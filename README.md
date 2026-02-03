@@ -30,7 +30,7 @@ When detecting small objects (humans, animals) in drone footage, standard method
 The system implements a novel "Search & Stare" architecture:
 
 <p align="center">
-  <img src="images/Architectural Diagram.png" alt="The Searchlight Protocol Pipeline Architecture" width="100%"/>
+  <img src="Images/Architectural Diagram.png" alt="The Searchlight Protocol Pipeline Architecture" width="100%"/>
   <br/>
   <sub><i>🎨 Diagram generated with Gemini</i></sub>
 </p>
@@ -74,7 +74,7 @@ Sample outputs from the pipeline showing the complete detection workflow:
 <summary><b>🔬 Example 1: Elephant Detection (DPP_00444)</b></summary>
 <br/>
 <p align="center">
-  <img src="images/Output_1.jpg" alt="Searchlight Protocol Results - Elephant Detection" width="100%"/>
+  <img src="Images/Output_1.jpg" alt="Searchlight Protocol Results - Elephant Detection" width="100%"/>
 </p>
 <i>The pipeline successfully detects elephants in savannah terrain. Top-left: Input image. Top-right: LayerCAM heatmap showing semantic hotspots. Bottom-left: Post-NMS bounding boxes from intelligent slicing. Bottom-right: Final YOLO detections with confidence scores.</i>
 </details>
@@ -83,7 +83,7 @@ Sample outputs from the pipeline showing the complete detection workflow:
 <summary><b>🔬 Example 2: Multi-Target Detection (DPP_00464)</b></summary>
 <br/>
 <p align="center">
-  <img src="images/Output_2.jpg" alt="Searchlight Protocol Results - Multi-Target Detection" width="100%"/>
+  <img src="Images/Output_2.jpg" alt="Searchlight Protocol Results - Multi-Target Detection" width="100%"/>
 </p>
 <i>Dense scene with multiple wildlife targets. The intelligent slicer generates numerous crops from heatmap hotspots, enabling YOLO to detect sheep, elephants, and other animals that would be invisible at standard resolution.</i>
 </details>
@@ -92,7 +92,7 @@ Sample outputs from the pipeline showing the complete detection workflow:
 <summary><b>🔬 Example 3: Wildlife Conservation (DPP_00465)</b></summary>
 <br/>
 <p align="center">
-  <img src="images/Output_3.jpg" alt="Searchlight Protocol Results - Wildlife Conservation" width="100%"/>
+  <img src="Images/Output_3.jpg" alt="Searchlight Protocol Results - Wildlife Conservation" width="100%"/>
 </p>
 <i>Demonstration of high-confidence detections across varying terrain. The context-aware cropping ensures full animal bodies are captured, improving classification accuracy.</i>
 </details>
