@@ -5,7 +5,7 @@ from PIL import Image, ImageEnhance
 import numpy as np
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-INCREASE_CONTRAST = 1.0
+INCREASE_CONTRAST = 1.8
 
 class DroneImageLoader:
     def __init__(self, max_dim):
