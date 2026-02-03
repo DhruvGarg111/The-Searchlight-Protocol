@@ -1,4 +1,4 @@
-# 🚁 Drone Forensics: The Searchlight Protocol 🔦
+# 🚁 Aerial Forensics: The Searchlight Protocol 🔦
 
 ![Python](https://img.shields.io/badge/Python-3.8%2B-blue?style=for-the-badge&logo=python&logoColor=white)
 ![PyTorch](https://img.shields.io/badge/PyTorch-EE4C2C?style=for-the-badge&logo=pytorch&logoColor=white)
@@ -27,11 +27,17 @@ When detecting small objects (humans, animals) in drone footage, standard method
 
 ## 🧠 Methodology: The 3-Stage Pipeline
 
-The system implements a novel "Search & Stare" architecture :
+The system implements a novel "Search & Stare" architecture:
+
+<p align="center">
+  <img src="images/Architectural Diagram.png" alt="The Searchlight Protocol Pipeline Architecture" width="100%"/>
+  <br/>
+  <sub><i>🎨 Diagram generated with Gemini</i></sub>
+</p>
 
 ### 1. Stage 1: The Guide (Global Context) 
 - **Backbone**: ResNet-50 (Pretrained).
-- **Technique**: Generates a **LayerCAM** saliency map from the deep convolutional layers (Layer 3/4) .
+- **Technique**: Generates a **LayerCAM** saliency map from the deep convolutional layers (Layer 3/4).
 - **Output**: A heatmap highlighting "anomalous" regions (potential targets) irrespective of their specific class.
 
 ### 2. Stage 2: The Intelligent Slicer 
@@ -56,7 +62,40 @@ The system implements a novel "Search & Stare" architecture :
 | **Efficiency** | ⚡ Fastest | 🐢 Slow (Processes Everything) | 🚀 **Efficient** (Skips Background) |
 | **False Positives** | Low | ⚠️ High (Hallucinations) | ✅ Low (Context Aware) |
 
-> **Case Study:** In tests containing small biological targets (e.g., Elephants), standard YOLO detected **0 objects**. SAHI detected **12 objects**, but many were hallucinations (labeled "broccoli" or "boot"). The Searchlight Protocol correctly identified the targets with high confidence .
+> **Case Study:** In tests containing small biological targets (e.g., Elephants), standard YOLO detected **0 objects**. SAHI detected **12 objects**, but many were hallucinations (labeled "broccoli" or "boot"). The Searchlight Protocol correctly identified the targets with high confidence.
+
+---
+
+## 🖼️ Results Gallery
+
+Sample outputs from the pipeline showing the complete detection workflow:
+
+<details>
+<summary><b>🔬 Example 1: Elephant Detection (DPP_00444)</b></summary>
+<br/>
+<p align="center">
+  <img src="images/Output_1.jpg" alt="Searchlight Protocol Results - Elephant Detection" width="100%"/>
+</p>
+<i>The pipeline successfully detects elephants in savannah terrain. Top-left: Input image. Top-right: LayerCAM heatmap showing semantic hotspots. Bottom-left: Post-NMS bounding boxes from intelligent slicing. Bottom-right: Final YOLO detections with confidence scores.</i>
+</details>
+
+<details>
+<summary><b>🔬 Example 2: Multi-Target Detection (DPP_00464)</b></summary>
+<br/>
+<p align="center">
+  <img src="images/Output_2.jpg" alt="Searchlight Protocol Results - Multi-Target Detection" width="100%"/>
+</p>
+<i>Dense scene with multiple wildlife targets. The intelligent slicer generates numerous crops from heatmap hotspots, enabling YOLO to detect sheep, elephants, and other animals that would be invisible at standard resolution.</i>
+</details>
+
+<details>
+<summary><b>🔬 Example 3: Wildlife Conservation (DPP_00465)</b></summary>
+<br/>
+<p align="center">
+  <img src="images/Output_3.jpg" alt="Searchlight Protocol Results - Wildlife Conservation" width="100%"/>
+</p>
+<i>Demonstration of high-confidence detections across varying terrain. The context-aware cropping ensures full animal bodies are captured, improving classification accuracy.</i>
+</details>
 
 ---
 
