@@ -4,7 +4,7 @@
 ![PyTorch](https://img.shields.io/badge/PyTorch-EE4C2C?style=for-the-badge&logo=pytorch&logoColor=white)
 ![YOLOv8](https://img.shields.io/badge/YOLO-v8-00FFFF?style=for-the-badge&logo=yolo&logoColor=black)
 ![Status](https://img.shields.io/badge/Status-Research_Prototype-orange?style=for-the-badge)
-![Ask DeepWiki](https://deepwiki.com/badge.svg)(https://deepwiki.com/DhruvGarg111/The-Searchlight-Protocol)
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/DhruvGarg111/The-Searchlight-Protocol)
 
 > **"Finding the needle in the haystack, from 400ft above."**
 
