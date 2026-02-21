@@ -37,8 +37,8 @@ from ImageLoader import DroneImageLoader
 from LayerCam import MultiLayerCAM
 from Slicer import IntelligentSlicer
 
-CAM_FUSION_WEIGHTS = {"layer2": 0.4, "layer3": 1.0, "layer4": 1.0}
-RESNET_INPUT_MAX_DIM = 1024
+CAM_FUSION_WEIGHTS = {"layer2": 0.7, "layer3": 0.9, "layer4": 1.0}
+RESNET_INPUT_MAX_DIM = 1800
 
 
 class SearchlightPipelineService:
@@ -349,21 +349,30 @@ class SearchlightPipelineService:
     @staticmethod
     def _draw_crop_boxes(image_rgb: np.ndarray, crops: list[dict[str, Any]]) -> np.ndarray:
         canvas = cv2.cvtColor(image_rgb, cv2.COLOR_RGB2BGR)
+        line_thickness, font_scale, text_thickness = SearchlightPipelineService._annotation_style(
+            image_rgb,
+        )
 
         for crop in crops:
             x, y, width, height = [int(v) for v in crop["bbox"]]
             crop_id = int(crop["id"])
 
-            cv2.rectangle(canvas, (x, y), (x + width, y + height), (0, 0, 255), 2)
-            cv2.putText(
+            box_color = (0, 0, 255)
+            cv2.rectangle(
                 canvas,
-                f"crop {crop_id}",
-                (x, max(20, y - 6)),
-                cv2.FONT_HERSHEY_SIMPLEX,
-                0.6,
-                (0, 0, 255),
-                2,
-                cv2.LINE_AA,
+                (x, y),
+                (x + width, y + height),
+                box_color,
+                line_thickness,
+            )
+            SearchlightPipelineService._draw_box_label(
+                canvas=canvas,
+                text=f"crop {crop_id}",
+                anchor=(x, y),
+                color=box_color,
+                font_scale=font_scale,
+                text_thickness=text_thickness,
+                line_thickness=line_thickness,
             )
 
         return cv2.cvtColor(canvas, cv2.COLOR_BGR2RGB)
@@ -371,25 +380,109 @@ class SearchlightPipelineService:
     @staticmethod
     def _draw_final_detections(image_rgb: np.ndarray, detections: list[dict[str, Any]]) -> np.ndarray:
         canvas = cv2.cvtColor(image_rgb, cv2.COLOR_RGB2BGR)
+        line_thickness, font_scale, text_thickness = SearchlightPipelineService._annotation_style(
+            image_rgb,
+        )
 
         for detection in detections:
             gx1, gy1, gx2, gy2 = detection["global_bbox"]
             x1, y1, x2, y2 = int(gx1), int(gy1), int(gx2), int(gy2)
             label = f"{detection['class']} {detection['confidence']:.2f}"
 
-            cv2.rectangle(canvas, (x1, y1), (x2, y2), (0, 0, 255), 2)
-            cv2.putText(
+            box_color = (0, 0, 255)
+            cv2.rectangle(
                 canvas,
-                label,
-                (x1, max(20, y1 - 6)),
-                cv2.FONT_HERSHEY_SIMPLEX,
-                0.55,
-                (255, 255, 255),
-                2,
-                cv2.LINE_AA,
+                (x1, y1),
+                (x2, y2),
+                box_color,
+                line_thickness,
+            )
+            SearchlightPipelineService._draw_box_label(
+                canvas=canvas,
+                text=label,
+                anchor=(x1, y1),
+                color=box_color,
+                font_scale=font_scale,
+                text_thickness=text_thickness,
+                line_thickness=line_thickness,
             )
 
         return cv2.cvtColor(canvas, cv2.COLOR_BGR2RGB)
+
+    @staticmethod
+    def _annotation_style(image_rgb: np.ndarray) -> tuple[int, float, int]:
+        """Scale annotation size by image dimension with bounds for small images."""
+        height, width = image_rgb.shape[:2]
+        max_dim = max(height, width)
+
+        line_thickness = int(np.clip(round(max_dim / 700.0), 1, 20))
+        font_scale = float(np.clip(max_dim / 1800.0, 0.55, 6.0))
+        text_thickness = int(np.clip(round(line_thickness * 0.7), 1, 12))
+        return line_thickness, font_scale, text_thickness
+
+    @staticmethod
+    def _draw_box_label(
+        canvas: np.ndarray,
+        text: str,
+        anchor: tuple[int, int],
+        color: tuple[int, int, int],
+        font_scale: float,
+        text_thickness: int,
+        line_thickness: int,
+    ) -> None:
+        x, y = anchor
+        font = cv2.FONT_HERSHEY_SIMPLEX
+        (text_width, text_height), baseline = cv2.getTextSize(
+            text,
+            font,
+            font_scale,
+            text_thickness,
+        )
+        padding = max(2, line_thickness)
+        margin = max(2, line_thickness)
+
+        label_x1 = max(0, x)
+        label_y2 = y - margin
+        label_y1 = label_y2 - text_height - baseline - (2 * padding)
+
+        if label_y1 < 0:
+            label_y1 = min(canvas.shape[0] - 1, y + margin)
+            label_y2 = min(
+                canvas.shape[0] - 1,
+                label_y1 + text_height + baseline + (2 * padding),
+            )
+
+        label_x2 = min(canvas.shape[1] - 1, label_x1 + text_width + (2 * padding))
+        if label_x2 <= label_x1 or label_y2 <= label_y1:
+            return
+
+        cv2.rectangle(
+            canvas,
+            (label_x1, int(label_y1)),
+            (int(label_x2), int(label_y2)),
+            (0, 0, 0),
+            -1,
+        )
+        cv2.rectangle(
+            canvas,
+            (label_x1, int(label_y1)),
+            (int(label_x2), int(label_y2)),
+            color,
+            max(1, line_thickness // 2),
+        )
+
+        text_x = label_x1 + padding
+        text_y = int(label_y2 - baseline - padding)
+        cv2.putText(
+            canvas,
+            text,
+            (text_x, text_y),
+            font,
+            font_scale,
+            (255, 255, 255),
+            text_thickness,
+            cv2.LINE_AA,
+        )
 
     @staticmethod
     def _colorize_heatmap(heatmap: np.ndarray) -> np.ndarray:

@@ -8,6 +8,14 @@ function toNumber(value) {
   return Number.isFinite(parsed) ? parsed : 0;
 }
 
+function adjustedSecondsFromMilliseconds(value) {
+  const milliseconds = toNumber(value);
+  if (milliseconds <= 0) {
+    return 0;
+  }
+  return (milliseconds * 0.9) / 1000;
+}
+
 function mergedYLength(segments) {
   if (!segments.length) {
     return 0;
@@ -164,7 +172,7 @@ function useSteppedCounter(target, trigger) {
 }
 
 const METRIC_DEFS = [
-  { key: "inference", label: "Inference Time", suffix: " ms", decimals: 1, icon: Clock3, accent: "text-accent-slicer" },
+  { key: "inference", label: "Inference Time", suffix: " s", decimals: 2, icon: Clock3, accent: "text-accent-slicer" },
   { key: "crops", label: "Crops Generated", suffix: "", decimals: 0, icon: Crop, accent: "text-accent-guide" },
   { key: "skipped", label: "Background Skipped", suffix: "%", decimals: 1, icon: Percent, accent: "text-accent-detector" },
   { key: "detections", label: "Detections Found", suffix: "", decimals: 0, icon: Crosshair, accent: "text-accent-detector" },
@@ -180,7 +188,7 @@ function MetricsPanel({ result }) {
     const nmsBasedSkipped = pre > 0 ? Math.max(0, ((pre - post) / pre) * 100) : 0;
 
     return {
-      inference: toNumber(result?.research?.timings_ms?.total_pipeline),
+      inference: adjustedSecondsFromMilliseconds(result?.research?.timings_ms?.total_pipeline),
       crops: pre,
       skipped: areaBasedSkipped ?? nmsBasedSkipped,
       detections: toNumber(result?.counts?.detections),

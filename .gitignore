@@ -1,0 +1,31 @@
+# Python cache/artifacts
+__pycache__/
+*.py[cod]
+*.pyc.*
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Local tooling state
+.agent/
+
+# Frontend build artifacts
+webapp/frontend/node_modules/
+webapp/frontend/dist/
+
+# Accidental root npm lockfile (frontend lockfile stays tracked)
+/package-lock.json
+
+# OS/editor noise
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+

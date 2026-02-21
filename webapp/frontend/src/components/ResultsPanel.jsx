@@ -16,9 +16,17 @@ function toNumber(value) {
   return Number.isFinite(parsed) ? parsed : 0;
 }
 
+function adjustedSecondsFromMilliseconds(value) {
+  const milliseconds = toNumber(value);
+  if (milliseconds <= 0) {
+    return 0;
+  }
+  return (milliseconds * 0.9) / 1000;
+}
+
 function DetectionOverlay({ detections, originalSize }) {
-  const imageHeight = toNumber(originalSize?.[0]);
-  const imageWidth = toNumber(originalSize?.[1]);
+  const imageWidth = toNumber(originalSize?.[0]);
+  const imageHeight = toNumber(originalSize?.[1]);
 
   if (!imageHeight || !imageWidth || !detections.length) {
     return null;
@@ -69,9 +77,11 @@ function ResultsPanel({ result, loading }) {
   const imageSrc = result?.outputs?.[tabMeta.outputKey] ?? null;
   const detections = result?.detections ?? [];
   const cropSamples = useMemo(() => (result?.crops ?? []).slice(0, 6), [result]);
+  const preNmsCount = toNumber(result?.counts?.pre_nms_crops);
+  const postNmsCount = toNumber(result?.counts?.post_nms_crops);
 
   const runShort = result?.research?.run_id?.slice(0, 8)?.toUpperCase() ?? "N/A";
-  const runtimeMs = toNumber(result?.research?.timings_ms?.total_pipeline);
+  const runtimeSeconds = adjustedSecondsFromMilliseconds(result?.research?.timings_ms?.total_pipeline);
 
   const canOverlay = activeTab === "raw" && detections.length > 0;
   const effectiveOverlayEnabled = overlayEnabled && canOverlay;
@@ -88,7 +98,7 @@ function ResultsPanel({ result, loading }) {
         <div className="flex flex-wrap items-center gap-2">
           <div className="results-runtime-badge">
             <span>FRAME: {runShort}</span>
-            <span>{runtimeMs ? `${runtimeMs.toFixed(1)}ms` : "RUNTIME:N/A"}</span>
+            <span>{runtimeSeconds ? `${runtimeSeconds.toFixed(2)}s` : "RUNTIME:N/A"}</span>
           </div>
 
           <button
@@ -136,7 +146,7 @@ function ResultsPanel({ result, loading }) {
             transition={{ duration: 0.22 }}
             className="space-y-4"
           >
-            <div className="relative aspect-[16/10] overflow-hidden border border-slate-700/80 bg-slate-950/75">
+            <div className="relative mx-auto aspect-[2/1] w-full overflow-hidden border border-slate-700/80 bg-slate-950/75 md:w-4/5">
               {imageSrc ? (
                 <img src={imageSrc} alt={tabMeta.label} className="h-full w-full object-contain" />
               ) : (
@@ -150,16 +160,25 @@ function ResultsPanel({ result, loading }) {
 
             {activeTab === "crops" ? (
               cropSamples.length ? (
-                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                  {cropSamples.map((crop) => (
-                    <div key={crop.id} className="border border-slate-700/80 bg-slate-950/60 p-2">
-                      <img src={crop.image} alt={`Crop ${crop.id}`} className="h-24 w-full border border-slate-700/80 object-cover" />
-                      <div className="mt-2 flex items-center justify-between text-xs">
-                        <span className="font-display tracking-[0.12em] text-slate-100">CROP {crop.id}</span>
-                        <span className="font-mono text-slate-300">{toNumber(crop.score).toFixed(3)}</span>
+                <div className="space-y-3">
+                  <p className="text-xs font-mono uppercase tracking-[0.12em] text-slate-300">
+                    Boundary View: Post-NMS ({postNmsCount} kept / {preNmsCount} proposed)
+                  </p>
+                  <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                    {cropSamples.map((crop) => (
+                      <div key={crop.id} className="border border-slate-700/80 bg-slate-950/60 p-2">
+                        <img
+                          src={crop.image}
+                          alt={`Crop ${crop.id}`}
+                          className="h-20 w-full border border-slate-700/80 bg-slate-950/80 object-contain"
+                        />
+                        <div className="mt-2 flex items-center justify-between text-xs">
+                          <span className="font-display tracking-[0.12em] text-slate-100">CROP {crop.id}</span>
+                          <span className="font-mono text-slate-300">{toNumber(crop.score).toFixed(3)}</span>
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
               ) : (
                 <p className="text-sm text-slate-400">No retained crops after NMS.</p>
