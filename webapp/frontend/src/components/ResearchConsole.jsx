@@ -25,15 +25,6 @@ const PARAM_GROUPS = [
         precision: 2,
         accent: "#7c5cff",
       },
-      {
-        key: "max_layercam_dim",
-        label: "Max Image Dimension",
-        min: 1024,
-        max: 6144,
-        step: 256,
-        precision: 0,
-        accent: "#7c5cff",
-      },
     ],
   },
   {
@@ -107,7 +98,7 @@ function ResearchConsole({ imageFile, params, onFileChange, onParamChange, onExe
         <div>
           <div className="mb-2 flex flex-wrap gap-2">
             <MicroLabel>MODEL VERSION: v0.3.2 EXPERIMENTAL</MicroLabel>
-            <MicroLabel>BACKBONE: RESNET50 (IMAGENET PRETRAINED)</MicroLabel>
+            <MicroLabel>BACKBONE: RESNET18 (IMAGENET PRETRAINED)</MicroLabel>
           </div>
           <p className="section-label">Research Console</p>
           <h2 className="mt-1 font-display text-xl tracking-[0.1em] text-slate-50 md:text-2xl">TACTICAL CONTROL PANEL</h2>

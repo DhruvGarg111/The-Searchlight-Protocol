@@ -12,7 +12,6 @@ const DEFAULT_PARAMS = {
   padding_factor: 0.4,
   yolo_confidence: 0.3,
   nms_iou_threshold: 0.2,
-  max_layercam_dim: 3072,
 };
 
 function App() {

@@ -7,7 +7,7 @@ import MicroLabel from "./ui/MicroLabel";
 const STAGES = [
   {
     code: "GUIDE",
-    title: "ResNet50 + LayerCAM",
+    title: "ResNet18 + LayerCAM",
     summary: "Generates semantic attention heatmaps.",
     detail: "Semantic activations provide priors for high-value regions before any detector pass.",
     icon: Binary,
@@ -23,7 +23,7 @@ const STAGES = [
   },
   {
     code: "DETECTOR",
-    title: "YOLOv8 + Fusion",
+    title: "YOLOv8n + Fusion",
     summary: "Runs inference on selected crops.",
     detail: "Crop-local predictions are projected to global coordinates and fused for mission-ready output.",
     icon: ScanSearch,

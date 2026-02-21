@@ -7,7 +7,7 @@ const STAGE_NODES = [
   {
     id: "guide",
     label: "GUIDE",
-    title: "ResNet50 + LayerCAM",
+    title: "ResNet18 + LayerCAM",
     top: "18%",
     left: "10%",
     accentClass: "node-guide",
@@ -23,7 +23,7 @@ const STAGE_NODES = [
   {
     id: "detector",
     label: "DETECTOR",
-    title: "YOLOv8 + Global Fusion",
+    title: "YOLOv8n + Global Fusion",
     top: "26%",
     left: "70%",
     accentClass: "node-detector",
