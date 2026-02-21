@@ -63,7 +63,7 @@ function DetectionOverlay({ detections, originalSize }) {
 
 function ResultsPanel({ result, loading }) {
   const [activeTab, setActiveTab] = useState("raw");
-  const [overlayEnabled, setOverlayEnabled] = useState(true);
+  const [overlayEnabled, setOverlayEnabled] = useState(false);
 
   const tabMeta = RESULT_TABS.find((tab) => tab.id === activeTab) ?? RESULT_TABS[0];
   const imageSrc = result?.outputs?.[tabMeta.outputKey] ?? null;
@@ -73,7 +73,8 @@ function ResultsPanel({ result, loading }) {
   const runShort = result?.research?.run_id?.slice(0, 8)?.toUpperCase() ?? "N/A";
   const runtimeMs = toNumber(result?.research?.timings_ms?.total_pipeline);
 
-  const canOverlay = (activeTab === "raw" || activeTab === "detections") && detections.length > 0;
+  const canOverlay = activeTab === "raw" && detections.length > 0;
+  const effectiveOverlayEnabled = overlayEnabled && canOverlay;
 
   return (
     <CornerFrame className="panel-shell rounded-sm px-5 py-6 md:px-8 md:py-7" markerTopLeft="SEC:04" markerBottomRight="VIS-D">
@@ -97,7 +98,7 @@ function ResultsPanel({ result, loading }) {
             disabled={!canOverlay}
           >
             <Layers3 className="h-3.5 w-3.5 text-accent-slicer" />
-            OVERLAY {overlayEnabled ? "ON" : "OFF"}
+            OVERLAY {effectiveOverlayEnabled ? "ON" : "OFF"}
           </button>
         </div>
       </div>
@@ -142,7 +143,7 @@ function ResultsPanel({ result, loading }) {
                 <div className="flex h-full items-center justify-center text-sm text-slate-500">No output for this tab.</div>
               )}
 
-              {overlayEnabled && canOverlay ? (
+              {effectiveOverlayEnabled ? (
                 <DetectionOverlay detections={detections} originalSize={result?.meta?.original_size} />
               ) : null}
             </div>
