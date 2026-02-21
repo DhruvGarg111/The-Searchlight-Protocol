@@ -1,386 +1,182 @@
+
 <div align="center">
 
-<svg width="100%" viewBox="0 0 1400 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="The Searchlight Protocol hero banner">
-  <rect width="1400" height="300" fill="#0b1220"/>
+<!-- Dynamic Typing Banner -->
+<img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=700&size=42&pause=1000&color=009688&center=true&vCenter=true&width=800&height=100&lines=The+Searchlight+Protocol;Aerial+Intelligence+System;Coarse-to-Fine+Detection;Semantic+Guidance+%2B+Slicing" alt="Typing SVG" />
 
-  <rect x="0" y="22" width="1400" height="2" fill="#7c3aed" opacity="0.75"/>
-  <rect x="0" y="278" width="1400" height="2" fill="#06b6d4" opacity="0.75"/>
+**Intelligent layer-based semantic guidance, selective slicing, and targeted detection for high-resolution aerial imagery.**
 
-  <circle cx="170" cy="84" r="64" fill="#7c3aed" opacity="0.10"/>
-  <circle cx="1220" cy="210" r="86" fill="#06b6d4" opacity="0.10"/>
-  <circle cx="1040" cy="72" r="42" fill="#f59e0b" opacity="0.12"/>
+<br>
 
-  <path d="M120 238 L380 52" stroke="#7c3aed" stroke-width="1.5" opacity="0.35"/>
-  <path d="M960 246 L1240 62" stroke="#06b6d4" stroke-width="1.5" opacity="0.35"/>
-  <path d="M520 248 L740 54" stroke="#f59e0b" stroke-width="1.5" opacity="0.28"/>
+<!-- Tech Stack Badges -->
+[![Python](https://img.shields.io/badge/Python-3.10+-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
+[![PyTorch](https://img.shields.io/badge/PyTorch-2.x-EE4C2C?style=for-the-badge&logo=pytorch&logoColor=white)](https://pytorch.org/)
+[![YOLOv8](https://img.shields.io/badge/YOLOv8-Fusion-00FFFF?style=for-the-badge&logo=yolo&logoColor=black)](https://github.com/ultralytics/ultralytics)
+[![FastAPI](https://img.shields.io/badge/FastAPI-Backend-009688?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
+[![React](https://img.shields.io/badge/React-Frontend-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://reactjs.org/)
 
-  <text x="700" y="134" text-anchor="middle" fill="#e2e8f0" font-family="Segoe UI, Arial, sans-serif" font-size="50" font-weight="700" letter-spacing="2">
-    THE SEARCHLIGHT PROTOCOL
-  </text>
-  <text x="700" y="178" text-anchor="middle" fill="#94a3b8" font-family="Segoe UI, Arial, sans-serif" font-size="20" letter-spacing="0.8">
-    Coarse-to-fine aerial intelligence for semantic guidance, selective slicing, and targeted detection
-  </text>
+<br>
 
-  <rect x="486" y="206" width="128" height="4" fill="#7c3aed" opacity="0.85" rx="2"/>
-  <rect x="636" y="206" width="128" height="4" fill="#06b6d4" opacity="0.85" rx="2"/>
-  <rect x="786" y="206" width="128" height="4" fill="#f59e0b" opacity="0.85" rx="2"/>
-</svg>
+<!-- Quick Links -->
+[**🌐 Launch Web App**](https://the-searchlight-protocol.vercel.app) &nbsp; • &nbsp;
+[**🐛 Report Bug**](https://github.com/DhruvGarg111/The-Searchlight-Protocol/issues) &nbsp; • &nbsp;
+[**💡 Request Feature**](https://github.com/DhruvGarg111/The-Searchlight-Protocol/issues)
 
 </div>
 
+---
+
 <div align="center">
-
-<table>
-  <tr>
-    <td><img src="https://img.shields.io/badge/Python-3.10%2B-334155?style=for-the-badge&logo=python&logoColor=white" alt="Python"/></td>
-    <td><img src="https://img.shields.io/badge/PyTorch-2.x-475569?style=for-the-badge&logo=pytorch&logoColor=white" alt="PyTorch"/></td>
-    <td><img src="https://img.shields.io/badge/YOLOv8-Fusion-0f172a?style=for-the-badge" alt="YOLOv8"/></td>
-  </tr>
-  <tr>
-    <td><img src="https://img.shields.io/badge/FastAPI-Backend-0f766e?style=for-the-badge&logo=fastapi&logoColor=white" alt="FastAPI"/></td>
-    <td><img src="https://img.shields.io/badge/React-Frontend-1e3a8a?style=for-the-badge&logo=react&logoColor=white" alt="React"/></td>
-    <td><img src="https://img.shields.io/badge/Status-Research%20Prototype-1f2937?style=for-the-badge" alt="Research Prototype"/></td>
-  </tr>
-</table>
-
+  <i>High-resolution aerial frames make small-object detection incredibly difficult when detector compute is constrained. <br>The Searchlight Protocol offers a <b>coarse-to-fine pipeline</b> that uses semantic prioritization to analyze only areas of interest.</i>
 </div>
 
-<svg width="100%" height="6">
-  <rect width="100%" height="6" fill="#0ea5e9" opacity="0.15"/>
-</svg>
+---
 
-<table>
-<tr>
-<td width="100%" style="padding:16px; border:1px solid #1e293b; border-radius:8px;">
-<b>PROJECT SUMMARY</b><br/>
-The Searchlight Protocol is a coarse-to-fine aerial detection system that prioritizes semantic attention before localized inference. It reduces unnecessary detector compute by isolating high-information regions before running object detection.
-</td>
-</tr>
-</table>
+## 💎 Core Capabilities
 
-<svg width="100%" height="6">
-  <rect width="100%" height="6" fill="#0ea5e9" opacity="0.15"/>
-</svg>
-
-## Visual Pipeline
-
-<div align="center">
-<svg width="100%" viewBox="0 0 1180 220" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Guide to Slicer to Detector pipeline">
-  <defs>
-    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
-      <path d="M0,0 L0,10 L10,5 z" fill="#64748b"/>
-    </marker>
-  </defs>
-
-  <rect x="70" y="52" width="300" height="116" rx="14" fill="#1e132f" stroke="#7c3aed" stroke-width="2"/>
-  <rect x="70" y="52" width="300" height="116" rx="14" fill="#7c3aed" opacity="0.08"/>
-  <text x="220" y="98" text-anchor="middle" fill="#e9d5ff" font-family="Segoe UI, Arial, sans-serif" font-size="20" font-weight="600">GUIDE</text>
-  <text x="220" y="125" text-anchor="middle" fill="#c4b5fd" font-family="Segoe UI, Arial, sans-serif" font-size="14">ResNet18 + LayerCAM</text>
-
-  <line x1="388" y1="110" x2="458" y2="110" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
-
-  <rect x="470" y="52" width="300" height="116" rx="14" fill="#0f2530" stroke="#06b6d4" stroke-width="2"/>
-  <rect x="470" y="52" width="300" height="116" rx="14" fill="#06b6d4" opacity="0.08"/>
-  <text x="620" y="98" text-anchor="middle" fill="#cffafe" font-family="Segoe UI, Arial, sans-serif" font-size="20" font-weight="600">SLICER</text>
-  <text x="620" y="125" text-anchor="middle" fill="#67e8f9" font-family="Segoe UI, Arial, sans-serif" font-size="14">Heatmap-based intelligent slicing</text>
-
-  <line x1="788" y1="110" x2="858" y2="110" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
-
-  <rect x="870" y="52" width="240" height="116" rx="14" fill="#2b210f" stroke="#f59e0b" stroke-width="2"/>
-  <rect x="870" y="52" width="240" height="116" rx="14" fill="#f59e0b" opacity="0.08"/>
-  <text x="990" y="98" text-anchor="middle" fill="#fef3c7" font-family="Segoe UI, Arial, sans-serif" font-size="20" font-weight="600">DETECTOR</text>
-  <text x="990" y="125" text-anchor="middle" fill="#fcd34d" font-family="Segoe UI, Arial, sans-serif" font-size="14">YOLOv8 + global fusion</text>
-</svg>
-</div>
-
-<svg width="100%" height="6">
-  <rect width="100%" height="6" fill="#0ea5e9" opacity="0.15"/>
-</svg>
-
-## Problem Motivation
-
-High-resolution aerial frames make small-object detection difficult when detector input dimensions are constrained.
-
-- Full-frame downscaling can erase small targets.
-- Exhaustive slicing spends compute on low-information background.
-- A practical pipeline needs semantic prioritization before local detection.
-
-<svg width="100%" height="6">
-  <rect width="100%" height="6" fill="#0ea5e9" opacity="0.15"/>
-</svg>
-
-## Methodology
-
-<table>
-<tr>
-<td width="100%" style="padding:16px; border:1px solid #1e293b; border-radius:8px;">
-<b>STAGE 1 - GUIDE</b><br/>
-ResNet18 + LayerCAM<br/>
-Generates spatial relevance maps from multiple backbone depths (`layer2[-1]`, `layer3[-1]`, `layer4[-1]`) and fuses them with weighted aggregation (`0.4, 1.0, 1.0`).
-</td>
-</tr>
-</table>
-
-<table>
-<tr>
-<td width="100%" style="padding:16px; border:1px solid #1e293b; border-radius:8px;">
-<b>STAGE 2 - SLICER</b><br/>
-Activation-based intelligent slicing<br/>
-Thresholds the fused heatmap, extracts contours, pads candidate regions, enforces minimum crop size, and applies NMS to reduce overlap.
-</td>
-</tr>
-</table>
-
-<table>
-<tr>
-<td width="100%" style="padding:16px; border:1px solid #1e293b; border-radius:8px;">
-<b>STAGE 3 - DETECTOR</b><br/>
-YOLOv8 detection with global remapping<br/>
-Runs inference only on retained crops and maps local detections to image-level coordinates for final fused output.
-</td>
-</tr>
-</table>
-
-Coordinate remapping:
-
-`[x1, y1, x2, y2]_global = [x1 + x_c, y1 + y_c, x2 + x_c, y2 + y_c]`
-
-<svg width="100%" height="6">
-  <rect width="100%" height="6" fill="#0ea5e9" opacity="0.15"/>
-</svg>
-
-## Architectural Flow
-
-1. Load and validate aerial frame.
-2. Build multi-layer semantic attention map.
-3. Slice high-activation regions into focused crops.
-4. Run YOLO on selected crops only.
-5. Fuse and remap detections to global coordinates.
-6. Return overlays, metadata, and per-stage timings.
-
-Reference orchestrator: `webapp/backend/services/pipeline_service.py`.
-
-<svg width="100%" height="6">
-  <rect width="100%" height="6" fill="#0ea5e9" opacity="0.15"/>
-</svg>
-
-## Performance Characteristics
-
-This repository does not claim fixed benchmark numbers. Runtime is scene-dependent and hardware-dependent.
-
-Per-stage profiling fields are returned in `research.timings_ms`:
-
-- `image_load`
-- `layercam_generation`
-- `intelligent_slicing`
-- `crop_nms`
-- `yolo_detection`
-- `total_pipeline`
-
-Current packaged detector checkpoint: `webapp/backend/yolov8n.pt`.
-
-<svg width="100%" height="6">
-  <rect width="100%" height="6" fill="#0ea5e9" opacity="0.15"/>
-</svg>
-
-## Results
-
-<div align="center">
-
-<table>
+<table align="center" width="100%">
   <tr>
-    <td align="center" width="33%">
-      <img src="Images/Output_1.jpg" width="300" alt="Output 1"/><br/>
-      <sub>Output 1: attention, crop selection, and final detections.</sub>
+    <td width="33%" align="center">
+      <h3>🎯 Precision Slicing</h3>
+      <p>Eliminates exhaustive grid-slicing by generating semantic heatmaps to isolate high-information background regions.</p>
     </td>
-    <td align="center" width="33%">
-      <img src="Images/Output_2.jpg" width="300" alt="Output 2"/><br/>
-      <sub>Output 2: high-density scene under semantic slicing.</sub>
+    <td width="33%" align="center">
+      <h3>🧠 Multi-Layer Attention</h3>
+      <p>Fuses spatial relevance maps from multiple backbone depths (Layer 2, 3, 4) using customized weighted aggregation.</p>
     </td>
-    <td align="center" width="33%">
-      <img src="Images/Output_3.jpg" width="300" alt="Output 3"/><br/>
-      <sub>Output 3: end-to-end qualitative output.</sub>
+    <td width="33%" align="center">
+      <h3>⚡ Optimized Compute</h3>
+      <p>By running high-fidelity YOLO inference <b>only</b> on retained candidate crops, detector workload is slashed dramatically.</p>
     </td>
   </tr>
 </table>
 
-<p>
-  <img src="Images/Architectural%20Diagram.png" width="86%" alt="Searchlight Protocol architecture"/>
-</p>
+## ⚙️ The Pipeline Architecture
 
+The protocol operates in three distinct, highly optimized stages. Local detection bounding boxes are mapped seamlessly back to the global frame.
+
+<div align="center">
+  <img src="https://github.com/DhruvGarg111/The-Searchlight-Protocol/raw/main/Images/Architectural%20Diagram.png" alt="Architecture" width="90%" style="border-radius: 12px; box-shadow: 0 4px 14px rgba(0,0,0,0.1);">
 </div>
+<br>
 
-<svg width="100%" height="6">
-  <rect width="100%" height="6" fill="#0ea5e9" opacity="0.15"/>
-</svg>
+> **1️⃣ STAGE 1: GUIDE (ResNet50 + LayerCAM)**  
+> Evaluates the full-scale image to generate semantic heatmaps. Highlights target-rich zones while suppressing empty background noise.
 
-## Web Application
+> **2️⃣ STAGE 2: SLICER (Intelligent Activation)**  
+> Thresholds the fused heatmap, extracts structural contours, pads candidates, and applies NMS to extract distinct, optimized bounding crops.
 
-<table>
-<tr>
-<td width="50%" style="padding:16px; border:1px solid #1e293b; border-radius:8px;">
-<b>Frontend (React)</b><br/>
-Interactive interface for input upload, parameter control, and visualization of attention maps, crops, and detections.
-</td>
-<td width="50%" style="padding:16px; border:1px solid #1e293b; border-radius:8px;">
-<b>Backend (FastAPI)</b><br/>
-Inference API handling validation, model lifecycle, orchestration, and structured response generation.
-</td>
-</tr>
-</table>
+> **3️⃣ STAGE 3: DETECTOR (YOLO + Global Fusion)**  
+> Ingests the localized crops into YOLO. Output bounding boxes are fused and remapped back to the absolute global coordinate space:  
+> `[x1, y1, x2, y2]_global = [x1 + x_c, y1 + y_c, x2 + x_c, y2 + y_c]`
 
-Inference flow:
+---
 
-`Upload -> LayerCAM guidance -> Intelligent slicing -> YOLO inference -> Global fusion -> JSON response`
+## 👁️ Visual Results
 
-API endpoints:
+Witness the pipeline step-by-step: from semantic attention mapping to smart slicing and the final end-to-end detection output.
 
-- `GET /api/health`
-- `POST /api/run-pipeline`
+| <div align="center">**1. Semantic Attention**</div> | <div align="center">**2. Smart Crop Selection**</div> | <div align="center">**3. Remapped Detections**</div> |
+| :---: | :---: | :---: |
+| <img src="https://github.com/DhruvGarg111/The-Searchlight-Protocol/raw/main/Images/Output_1.jpg" width="300" style="border-radius: 8px;"> | <img src="https://github.com/DhruvGarg111/The-Searchlight-Protocol/raw/main/Images/Output_2.jpg" width="300" style="border-radius: 8px;"> | <img src="https://github.com/DhruvGarg111/The-Searchlight-Protocol/raw/main/Images/Output_3.jpg" width="300" style="border-radius: 8px;"> |
+| *Identifies potential targets* | *Isolates areas of interest* | *High-fidelity detection* |
 
-<svg width="100%" height="6">
-  <rect width="100%" height="6" fill="#0ea5e9" opacity="0.15"/>
-</svg>
+---
 
-## Repository Structure
+## 💻 Technical Stack
 
-```text
-project/
-|-- LayerCam.py
-|-- Slicer.py
-|-- Detector.py
-|-- ImageLoader.py
-|-- The_searchlight_Protocol_main.ipynb
-|-- Images/
-`-- webapp/
-    |-- backend/
-    |   |-- main.py
-    |   |-- routers/
-    |   |-- services/pipeline_service.py
-    |   `-- yolov8n.pt
-    `-- frontend/
-        |-- src/
-        `-- package.json
+<details>
+<summary><b>View Stack Details</b> (Click to expand)</summary>
+<br>
+
+- **Frontend Interface:** ⚛️ **React** - Provides an interactive console for input upload, parameter control, and real-time visualization of intermediate outputs.
+- **Backend API:** ⚡ **FastAPI** - Handles validation, model lifecycle orchestration, memory-safe inference routing, and JSON response payload generation.
+- **Computer Vision:** 👁️ **PyTorch & OpenCV** - Core engines for LayerCAM generation, morphological operations, NMS, and matrix manipulation.
+- **Inference Pipeline Flow:**  
+  `Upload` ➡️ `LayerCAM guidance` ➡️ `Slicing` ➡️ `YOLO execution` ➡️ `Global fusion` ➡️ `JSON payload`
+
+</details>
+
+---
+
+## 🚀 Getting Started
+
+### Local Setup
+
+**1. Clone the repository**
+```bash
+git clone https://github.com/DhruvGarg111/The-Searchlight-Protocol.git
+cd The-Searchlight-Protocol
 ```
 
-Module notes:
-
-- `LayerCam.py`: LayerCAM generation and multi-layer map fusion.
-- `Slicer.py`: Heatmap thresholding, contour extraction, crop padding, and crop scoring.
-- `Detector.py`: YOLO wrapper for controlled crop-level inference.
-- `webapp/backend/services/pipeline_service.py`: End-to-end pipeline execution.
-- `webapp/frontend/src/`: Research console UI and visualization components.
-
-<svg width="100%" height="6">
-  <rect width="100%" height="6" fill="#0ea5e9" opacity="0.15"/>
-</svg>
-
-## Setup and Execution
-
-Requirements:
-
-- Python 3.10+
-- Node.js 18+
-- Optional CUDA GPU
-
-Install:
-
+**2. Boot the API (Backend)**
 ```bash
 python -m venv .venv
-source .venv/bin/activate  # Windows PowerShell: .\.venv\Scripts\Activate.ps1
+source .venv/bin/activate  # Windows: .venv\Scripts\activate
+
 pip install -r requirements.txt
 pip install -r webapp/backend/requirements.txt
-```
 
-Run backend:
-
-```bash
 cd webapp/backend
 uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 ```
 
-Run frontend:
-
+**3. Launch the Console (Frontend)**
 ```bash
+# Open a new terminal tab
 cd webapp/frontend
 npm install
 npm run dev
 ```
 
-<svg width="100%" height="6">
-  <rect width="100%" height="6" fill="#0ea5e9" opacity="0.15"/>
-</svg>
+---
 
-## Free Deployment (Hugging Face + Vercel)
+## ☁️ Zero-Cost Cloud Deployment
 
-This repository includes a root-level `Dockerfile` and `.dockerignore` so the backend can import root modules (`LayerCam.py`, `Slicer.py`, `Detector.py`, `ImageLoader.py`) while serving FastAPI from `webapp/backend`.
+<details>
+<summary><b>Deploying to Hugging Face + Vercel</b> (Click to expand)</summary>
+<br>
 
-### 1. Deploy Backend to Hugging Face Spaces (Docker)
+**1. Backend (Hugging Face Spaces)**
+- Create a new HF Space (`Docker`, `CPU Basic`).
+- Push the **full** repository to the Space.
+- Set **Space Variables**:
+  - `SEARCHLIGHT_PRELOAD_MODELS=true`
+  - `SEARCHLIGHT_SERIAL_EXECUTION=true`
+  - `SEARCHLIGHT_LOG_LEVEL=INFO`
+- Copy your running Space URL (e.g., `https://username-space.hf.space`).
 
-1. Create a new Hugging Face Space with:
-   - SDK: `Docker`
-   - Hardware: `CPU Basic (free)`
-2. Push this full repository to the Space (do not push `webapp/backend` alone).
-3. Configure Space variables:
-   - `SEARCHLIGHT_PRELOAD_MODELS=true`
-   - `SEARCHLIGHT_SERIAL_EXECUTION=true`
-   - `SEARCHLIGHT_LOG_LEVEL=INFO`
-4. After build is `Running`, copy the Space URL:
-   - `https://<your-username>-<space-name>.hf.space`
+**2. Frontend (Vercel)**
+- Import the repo into Vercel and set the **Root Directory** to `webapp/frontend`.
+- Add Environment Variable: `VITE_API_BASE_URL` = `<your_hf_space_url>`.
+- Deploy and copy your Vercel project URL.
 
-### 2. Deploy Frontend to Vercel
+**3. Enable CORS**
+- Go back to your Hugging Face Space variables.
+- Add `SEARCHLIGHT_ALLOW_ORIGINS` = `<your_vercel_url>`.
+- Restart the HF space.
 
-1. Import the same GitHub repository in Vercel.
-2. Set `Root Directory` to `webapp/frontend`.
-3. Add environment variable:
-   - `VITE_API_BASE_URL=https://<your-username>-<space-name>.hf.space`
-   - No trailing slash.
-4. Deploy and copy the production URL:
-   - `https://<your-project>.vercel.app`
+</details>
 
-### 3. Finalize CORS
+---
 
-Add this Hugging Face Space variable and let the Space restart:
+## 🗺️ Roadmap & Evolution
 
-- `SEARCHLIGHT_ALLOW_ORIGINS=https://<your-project>.vercel.app`
+- [x] **v1.0** — Core 3-stage coarse-to-fine pipeline implementation
+- [x] **v1.1** — Heatmap-based intelligent slicing with NMS
+- [x] **v1.2** — Full-stack web inference console (React + FastAPI)
+- [ ] **v2.0** — Temporal consistency for live video streams
+- [ ] **v2.1** — Edge device deployment optimizations (TensorRT/ONNX)
+- [ ] **v3.0** — Multi-object tracking temporal integration
 
-This backend currently assumes a production-only CORS policy.
-
-### 4. Validation Checklist
-
-- Backend health:
-  - `GET https://<space>.hf.space/api/health` returns `200` with `status: "ok"`.
-- Frontend integration:
-  - Uploading an image from Vercel succeeds with no browser CORS errors.
-- Negative cases:
-  - Non-image upload returns `400`.
-  - Oversized upload returns `400`.
-  - Requests from non-whitelisted origins are blocked by CORS.
-
-### 5. Rollback
-
-If a deployment fails after changes, revert the last commit in the Hugging Face Space repo and redeploy the previous known-good image.
-
-<svg width="100%" height="6">
-  <rect width="100%" height="6" fill="#0ea5e9" opacity="0.15"/>
-</svg>
-
-## Roadmap
-
-- [x] Core 3-stage pipeline
-- [x] Intelligent slicing
-- [x] Web inference console
-- [ ] Temporal consistency
-- [ ] Edge deployment
-- [ ] Tracking integration
-
-<svg width="100%" height="6">
-  <rect width="100%" height="6" fill="#0ea5e9" opacity="0.15"/>
-</svg>
+---
 
 <div align="center">
-
-Experimental Aerial Intelligence System  
-Designed for high-resolution semantic localization and targeted inference.
-
+  <p>Engineered & Designed by <a href="https://github.com/DhruvGarg111"><b>DhruvGarg111</b></a></p>
+  <p>
+    <a href="https://github.com/DhruvGarg111/The-Searchlight-Protocol/stargazers">
+      <img src="https://img.shields.io/github/stars/DhruvGarg111/The-Searchlight-Protocol?style=social" alt="Stars"/>
+    </a>
+  </p>
+  <i>If this repository accelerates your research or projects, please consider dropping a ⭐!</i>
 </div>
