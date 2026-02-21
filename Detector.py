@@ -16,7 +16,7 @@ class YOLODetector:
     def __init__(
         self,
         model_version: str = "v8",
-        model_variant: str = "m",
+        model_variant: str = "n",
         model_path: str | None = None,
         conf: float = 0.25,
         iou: float = 0.45,

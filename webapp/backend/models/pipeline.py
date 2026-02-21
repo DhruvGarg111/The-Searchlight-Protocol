@@ -12,6 +12,5 @@ class PipelineSettings(BaseModel):
     heatmap_threshold: float = Field(default=0.4, ge=0.0, le=1.0)
     yolo_confidence: float = Field(default=0.3, ge=0.0, le=1.0)
     min_crop_size: int = Field(default=120, ge=32, le=4096)
-    max_layercam_dim: int = Field(default=3072, ge=512, le=12000)
     nms_iou_threshold: float = Field(default=0.2, ge=0.0, le=1.0)
     yolo_iou_threshold: float = Field(default=0.6, ge=0.0, le=1.0)

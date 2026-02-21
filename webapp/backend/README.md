@@ -73,8 +73,9 @@ Returns:
 - `heatmap_threshold` (default `0.4`)
 - `yolo_confidence` (default `0.3`)
 - `min_crop_size` (default `120`)
-- `max_layercam_dim` (default `3072`)
 - `nms_iou_threshold` (default `0.2`)
+
+ResNet guide preprocessing uses a fixed max image dimension of `1024`.
 
 Response includes:
 - `meta`, `settings`, `counts`, `research`

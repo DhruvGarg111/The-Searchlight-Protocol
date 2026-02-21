@@ -51,7 +51,6 @@ async def run_pipeline(
     heatmap_threshold: float = Form(0.4, ge=0.0, le=1.0),
     yolo_confidence: float = Form(0.3, ge=0.0, le=1.0),
     min_crop_size: int = Form(120, ge=32, le=4096),
-    max_layercam_dim: int = Form(3072, ge=512, le=12000),
     nms_iou_threshold: float = Form(0.2, ge=0.0, le=1.0),
     pipeline_service: SearchlightPipelineService = Depends(get_pipeline_service),
     config: AppConfig = Depends(get_app_config),
@@ -74,7 +73,6 @@ async def run_pipeline(
             heatmap_threshold=heatmap_threshold,
             yolo_confidence=yolo_confidence,
             min_crop_size=min_crop_size,
-            max_layercam_dim=max_layercam_dim,
             nms_iou_threshold=nms_iou_threshold,
         )
 

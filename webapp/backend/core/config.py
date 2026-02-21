@@ -68,13 +68,16 @@ def get_config() -> AppConfig:
             "http://127.0.0.1:5173",
         )
 
+    default_yolo_version = os.getenv("SEARCHLIGHT_YOLO_MODEL_VERSION", "v8")
+    default_yolo_variant = os.getenv("SEARCHLIGHT_YOLO_MODEL_VARIANT", "n")
+
     model_path_env = os.getenv("SEARCHLIGHT_YOLO_MODEL_PATH")
     if model_path_env:
         model_path = Path(model_path_env)
         if not model_path.is_absolute():
             model_path = (BACKEND_DIR / model_path).resolve()
     else:
-        model_path = BACKEND_DIR / "yolov9m.pt"
+        model_path = BACKEND_DIR / f"yolo{default_yolo_version}{default_yolo_variant}.pt"
 
     return AppConfig(
         api_title=os.getenv("SEARCHLIGHT_API_TITLE", "Searchlight Pipeline API"),
@@ -88,7 +91,7 @@ def get_config() -> AppConfig:
         preload_models=_env_bool("SEARCHLIGHT_PRELOAD_MODELS", True),
         clear_cuda_cache_per_request=_env_bool("SEARCHLIGHT_CLEAR_CUDA_CACHE_PER_REQUEST", False),
         serial_execution=_env_bool("SEARCHLIGHT_SERIAL_EXECUTION", True),
-        yolo_model_version=os.getenv("SEARCHLIGHT_YOLO_MODEL_VERSION", "v9"),
-        yolo_model_variant=os.getenv("SEARCHLIGHT_YOLO_MODEL_VARIANT", "m"),
+        yolo_model_version=default_yolo_version,
+        yolo_model_variant=default_yolo_variant,
         yolo_model_path=model_path,
     )

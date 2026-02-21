@@ -75,7 +75,7 @@ The Searchlight Protocol is a coarse-to-fine aerial detection system that priori
   <rect x="70" y="52" width="300" height="116" rx="14" fill="#1e132f" stroke="#7c3aed" stroke-width="2"/>
   <rect x="70" y="52" width="300" height="116" rx="14" fill="#7c3aed" opacity="0.08"/>
   <text x="220" y="98" text-anchor="middle" fill="#e9d5ff" font-family="Segoe UI, Arial, sans-serif" font-size="20" font-weight="600">GUIDE</text>
-  <text x="220" y="125" text-anchor="middle" fill="#c4b5fd" font-family="Segoe UI, Arial, sans-serif" font-size="14">ResNet50 + LayerCAM</text>
+  <text x="220" y="125" text-anchor="middle" fill="#c4b5fd" font-family="Segoe UI, Arial, sans-serif" font-size="14">ResNet18 + LayerCAM</text>
 
   <line x1="388" y1="110" x2="458" y2="110" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
 
@@ -115,7 +115,7 @@ High-resolution aerial frames make small-object detection difficult when detecto
 <tr>
 <td width="100%" style="padding:16px; border:1px solid #1e293b; border-radius:8px;">
 <b>STAGE 1 - GUIDE</b><br/>
-ResNet50 + LayerCAM<br/>
+ResNet18 + LayerCAM<br/>
 Generates spatial relevance maps from multiple backbone depths (`layer2[-1]`, `layer3[-1]`, `layer4[-1]`) and fuses them with weighted aggregation (`0.4, 1.0, 1.0`).
 </td>
 </tr>
@@ -177,7 +177,7 @@ Per-stage profiling fields are returned in `research.timings_ms`:
 - `yolo_detection`
 - `total_pipeline`
 
-Current packaged detector checkpoint: `webapp/backend/yolov9m.pt`.
+Current packaged detector checkpoint: `webapp/backend/yolov8n.pt`.
 
 <svg width="100%" height="6">
   <rect width="100%" height="6" fill="#0ea5e9" opacity="0.15"/>
@@ -257,7 +257,7 @@ project/
     |   |-- main.py
     |   |-- routers/
     |   |-- services/pipeline_service.py
-    |   `-- yolov9m.pt
+    |   `-- yolov8n.pt
     `-- frontend/
         |-- src/
         `-- package.json

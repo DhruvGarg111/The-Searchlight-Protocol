@@ -38,6 +38,7 @@ from LayerCam import MultiLayerCAM
 from Slicer import IntelligentSlicer
 
 CAM_FUSION_WEIGHTS = {"layer2": 0.4, "layer3": 1.0, "layer4": 1.0}
+RESNET_INPUT_MAX_DIM = 1024
 
 
 class SearchlightPipelineService:
@@ -108,7 +109,7 @@ class SearchlightPipelineService:
             self._maybe_clear_cuda_cache()
 
             t0 = time.perf_counter()
-            loader = DroneImageLoader(max_dim=settings.max_layercam_dim, device=self.device)
+            loader = DroneImageLoader(max_dim=RESNET_INPUT_MAX_DIM, device=self.device)
             original_np, input_tensor, original_size, scale_factor = loader.load(image_path)
             stage_timings_ms["image_load"] = (time.perf_counter() - t0) * 1000.0
 
@@ -181,7 +182,7 @@ class SearchlightPipelineService:
                     "experiment": "searchlight-protocol-research",
                     "objective": "LayerCAM-guided high-resolution small object detection in aerial imagery.",
                     "model_stack": {
-                        "guide_backbone": "ResNet50 (ImageNet1K_V1)",
+                        "guide_backbone": "ResNet18 (ImageNet1K_V1)",
                         "guide_target_layers": ["layer2[-1]", "layer3[-1]", "layer4[-1]"],
                         "cam_fusion_weights": CAM_FUSION_WEIGHTS,
                         "detector": f"YOLO{self.config.yolo_model_version}-{self.config.yolo_model_variant}",
@@ -240,13 +241,13 @@ class SearchlightPipelineService:
     def _ensure_guide_model(self) -> torch.nn.Module:
         with self._model_lock:
             if self._guide_model is None:
-                LOGGER.info("Loading ResNet50 guide model on %s", self.device)
+                LOGGER.info("Loading ResNet18 guide model on %s", self.device)
                 try:
-                    weights = models.ResNet50_Weights.IMAGENET1K_V1
+                    weights = models.ResNet18_Weights.IMAGENET1K_V1
                 except AttributeError:
                     weights = "IMAGENET1K_V1"
 
-                self._guide_model = models.resnet50(weights=weights).to(self.device)
+                self._guide_model = models.resnet18(weights=weights).to(self.device)
                 self._guide_model.eval()
         return self._guide_model
 
@@ -254,14 +255,23 @@ class SearchlightPipelineService:
         with self._model_lock:
             if self._detector is None:
                 model_path = self.config.yolo_model_path
-                if not model_path.exists():
-                    raise RuntimeError(f"YOLO model file not found: {model_path}")
+                if model_path.exists():
+                    detector_model_path = str(model_path)
+                    LOGGER.info("Loading YOLO detector from %s", model_path)
+                else:
+                    detector_model_path = (
+                        f"yolo{self.config.yolo_model_version}{self.config.yolo_model_variant}.pt"
+                    )
+                    LOGGER.warning(
+                        "YOLO model file not found at %s; falling back to %s",
+                        model_path,
+                        detector_model_path,
+                    )
 
-                LOGGER.info("Loading YOLO detector from %s", model_path)
                 self._detector = YOLODetector(
                     model_version=self.config.yolo_model_version,
                     model_variant=self.config.yolo_model_variant,
-                    model_path=str(model_path),
+                    model_path=detector_model_path,
                     device=str(self.device),
                 )
         return self._detector
