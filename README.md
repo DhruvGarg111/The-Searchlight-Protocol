@@ -14,7 +14,9 @@
 [![YOLOv8](https://img.shields.io/badge/YOLOv8-Fusion-00FFFF?style=for-the-badge&logo=yolo&logoColor=black)](https://github.com/ultralytics/ultralytics)
 [![FastAPI](https://img.shields.io/badge/FastAPI-Backend-009688?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
 [![React](https://img.shields.io/badge/React-Frontend-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://reactjs.org/)
-
+<a href="https://deepwiki.com/DhruvGarg111/The-Searchlight-Protocol">
+  <img src="https://deepwiki.com/badge.svg" height="28">
+</a>
 <br>
 
 <!-- Quick Links -->
