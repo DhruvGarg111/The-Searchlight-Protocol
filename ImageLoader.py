@@ -1,4 +1,4 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
 import logging
 from pathlib import Path
@@ -14,7 +14,12 @@ DEFAULT_CONTRAST_FACTOR = 1.8
 
 
 class DroneImageLoader:
-    """Loads and normalizes aerial images for CAM generation."""
+    """Loads, enhances, and normalizes high-resolution aerial images for CAM generation.
+
+    This loader applies contrast enhancement to emphasize features in low-contrast aerial imagery
+    and downsamples the image while preserving the aspect ratio to fit within a specified maximum
+    dimension. Finally, it converts the image to a normalized PyTorch tensor ready for model inference.
+    """
 
     def __init__(
         self,
@@ -22,6 +27,16 @@ class DroneImageLoader:
         contrast_factor: float = DEFAULT_CONTRAST_FACTOR,
         device: torch.device | str | None = None,
     ) -> None:
+        """Initializes the DroneImageLoader.
+
+        Args:
+            max_dim: The maximum height or width dimension allowed for the model-input tensor.
+                Images larger than this will be downsampled to fit this dimension.
+            contrast_factor: Factor to multiply the image contrast by. Defaults to 1.8.
+                Use 1.0 to disable contrast enhancement.
+            device: The PyTorch device (CPU, CUDA, etc.) to place the final tensor on.
+                If None, defaults to GPU if CUDA is available, else CPU.
+        """
         self.max_dim = max_dim
         self.contrast_factor = contrast_factor
         self.device = torch.device(device or ("cuda" if torch.cuda.is_available() else "cpu"))
@@ -34,6 +49,21 @@ class DroneImageLoader:
         )
 
     def load(self, image_path: str | Path) -> tuple[np.ndarray, torch.Tensor, tuple[int, int], float]:
+        """Loads and preprocesses an image from the given path.
+
+        Args:
+            image_path: Absolute or relative path to the target image file.
+
+        Returns:
+            A tuple containing:
+                - original_np (np.ndarray): The contrast-enhanced, full-resolution image as a NumPy array (HWC, RGB).
+                - tensor (torch.Tensor): Preprocessed, downscaled, and normalized image tensor of shape (1, 3, H, W).
+                - original_size (tuple[int, int]): The (width, height) of the original image before any resizing.
+                - scale (float): The scaling factor applied to the image (e.g., 0.5 means resized to 50% width/height).
+
+        Raises:
+            FileNotFoundError: If the image_path does not exist on disk.
+        """
         image_path = Path(image_path)
         if not image_path.exists():
             raise FileNotFoundError(f"Image not found at {image_path}")

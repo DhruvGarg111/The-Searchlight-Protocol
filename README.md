@@ -62,7 +62,7 @@ The protocol operates in three distinct, highly optimized stages. Local detectio
 </div>
 <br>
 
-> **1️⃣ STAGE 1: GUIDE (ResNet50 + LayerCAM)**  
+> **1️⃣ STAGE 1: GUIDE (ResNet18 + LayerCAM)**  
 > Evaluates the full-scale image to generate semantic heatmaps. Highlights target-rich zones while suppressing empty background noise.
 
 > **2️⃣ STAGE 2: SLICER (Intelligent Activation)**  

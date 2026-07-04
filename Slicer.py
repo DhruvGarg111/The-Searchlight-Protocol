@@ -1,4 +1,4 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
 import logging
 
@@ -9,9 +9,24 @@ LOGGER = logging.getLogger(__name__)
 
 
 class IntelligentSlicer:
-    """Contours high-activation heatmap regions and emits padded crops."""
+    """Slices a large high-resolution image into smaller regions of interest based on a semantic heatmap.
+
+    Avoids brute-force grid-slicing by identifying contiguous regions of high activation in a heatmap,
+    finding their bounding contours, applying padding, enforcing size constraints, and cropping them
+    for targeted downstream detection.
+    """
 
     def __init__(self, padding_factor: float, info_threshold: float, min_crop_size: int) -> None:
+        """Initializes the IntelligentSlicer.
+
+        Args:
+            padding_factor: The ratio of padding to apply around detected contours
+                (e.g., 0.4 applies 40% of bounding box width/height as padding on each side).
+            info_threshold: The cutoff threshold (between 0.0 and 1.0) above which
+                heatmap activations are considered regions of interest.
+            min_crop_size: The minimum pixel dimension (height or width) for any crop.
+                Crops smaller than this will be expanded symmetrically or clamped.
+        """
         self.padding_factor = padding_factor
         self.info_threshold = info_threshold
         self.min_crop_size = min_crop_size
@@ -21,6 +36,24 @@ class IntelligentSlicer:
         original_image: np.ndarray,
         heatmap: np.ndarray,
     ) -> tuple[list[dict[str, object]], np.ndarray, np.ndarray]:
+        """Extracts regions of interest from the original image based on high activation regions.
+
+        Args:
+            original_image: The full-resolution original image as a NumPy array (HWC, RGB).
+            heatmap: The normalized 2D semantic guidance heatmap (0.0 to 1.0) of shape (H_cam, W_cam).
+
+        Returns:
+            A tuple containing:
+                - crops (list[dict[str, object]]): List of dictionary representations of crops.
+                    Each dict contains:
+                        - "id" (int): Index of the crop.
+                        - "image" (np.ndarray): Padded and cropped sub-image.
+                        - "bbox" (tuple[int, int, int, int]): Crop boundaries in original image coordinates
+                          as (x, y, width, height).
+                        - "score" (float): Mean heatmap activation value within the bounding box.
+                - mask (np.ndarray): The binary threshold mask used to identify regions of interest.
+                - heatmap_resized (np.ndarray): The original heatmap resized to match original_image dimensions.
+        """
         height, width = original_image.shape[:2]
         heatmap_resized = cv2.resize(heatmap.astype(np.float32), (width, height))
 
