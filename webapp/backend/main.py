@@ -1,4 +1,4 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -19,8 +19,15 @@ except ImportError:
     from services.pipeline_service import SearchlightPipelineService
 
 
-
 def create_app() -> FastAPI:
+    """FastAPI application factory.
+
+    Loads the cached application settings, configures logging, registers CORS middleware,
+    mounts API router layers, and binds startup/shutdown lifecycle event handlers.
+
+    Returns:
+        FastAPI: Fully configured FastAPI app instance.
+    """
     config = get_config()
     configure_logging(config.log_level)
 
@@ -42,11 +49,13 @@ def create_app() -> FastAPI:
 
     @app.on_event("startup")
     def on_startup() -> None:
+        """Startup lifecycle handler to optionally warmup ML models."""
         if config.preload_models:
             app.state.pipeline_service.warmup()
 
     @app.on_event("shutdown")
     def on_shutdown() -> None:
+        """Shutdown lifecycle handler to release ML models and free resources."""
         app.state.pipeline_service.close()
 
     return app

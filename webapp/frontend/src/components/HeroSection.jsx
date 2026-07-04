@@ -1,4 +1,4 @@
-﻿import { memo } from "react";
+import { memo } from "react";
 import { Eye, Radar, ScanLine } from "lucide-react";
 import CornerFrame from "./ui/CornerFrame";
 import MicroLabel from "./ui/MicroLabel";
@@ -30,6 +30,14 @@ const STAGE_NODES = [
   },
 ];
 
+/**
+ * HeroSection Component
+ *
+ * Renders the top-level hero banner, including an interactive network flow visualization of the three
+ * execution stages (Guide, Slicer, Detector) and introductory mission parameters.
+ *
+ * @returns {JSX.Element}
+ */
 function HeroSection() {
   return (
     <CornerFrame className="panel-shell hero-shell rounded-sm px-5 py-6 md:px-8 md:py-8" markerTopLeft="SEC:01" markerBottomRight="HERO-A">

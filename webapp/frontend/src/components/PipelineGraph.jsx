@@ -1,4 +1,4 @@
-﻿import { memo, useState } from "react";
+import { memo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Binary, Crop, ScanSearch } from "lucide-react";
 import CornerFrame from "./ui/CornerFrame";
@@ -31,6 +31,15 @@ const STAGES = [
   },
 ];
 
+/**
+ * PipelineGraph Component
+ *
+ * Renders an interactive schematic panel illustrating the three primary execution pipeline
+ * stages (Guide, Slicer, Detector) along with explanations of their underlying architectures
+ * (ResNet18, Heatmap Slicing, YOLOv8). Hovering over a stage displays extra architectural notes.
+ *
+ * @returns {JSX.Element}
+ */
 function PipelineGraph() {
   const [hoveredIndex, setHoveredIndex] = useState(-1);
 

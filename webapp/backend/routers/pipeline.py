@@ -1,4 +1,4 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
 import asyncio
 import logging
@@ -55,6 +55,30 @@ async def run_pipeline(
     pipeline_service: SearchlightPipelineService = Depends(get_pipeline_service),
     config: AppConfig = Depends(get_app_config),
 ) -> RunPipelineResponse:
+    """Runs the 3-stage coarse-to-fine object detection pipeline on the uploaded image.
+
+    Validates the image file payload, parses the pipeline configuration settings, offloads the
+    heavy CPU/GPU inference tasks to a background thread pool, and maps detections back to global coordinates.
+
+    Args:
+        image: Multipart file upload containing the target high-resolution image.
+        padding_factor: Relative boundary padding to apply around semantic candidate crops (0.0 to 1.0).
+        heatmap_threshold: Activation intensity threshold above which regions are selected (0.0 to 1.0).
+        yolo_confidence: Minimum confidence threshold for YOLO object detections (0.0 to 1.0).
+        min_crop_size: Minimum height/width dimension in pixels for extracted crops (32 to 4096).
+        nms_iou_threshold: Intersection-over-Union (IoU) threshold for crop-level deduplication.
+        pipeline_service: Dependency-injected searchlight pipeline service instance.
+        config: Dependency-injected application configuration settings.
+
+    Returns:
+        RunPipelineResponse: JSON-compatible API response containing base64 visual outputs
+            (original, heatmap, crops mask, and final remapped bounding boxes) along with lists of detections.
+
+    Raises:
+        HTTPException (400): If image validation (format, size, dimensions) fails.
+        HTTPException (504): If pipeline processing exceeds the configured timeout duration.
+        HTTPException (500): If the backend encounters an unhandled model inference or system error.
+    """
     try:
         validate_content_type(image.content_type)
 

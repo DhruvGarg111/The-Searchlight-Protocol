@@ -1,4 +1,4 @@
-﻿import { memo, useMemo, useRef, useState } from "react";
+import { memo, useMemo, useRef, useState } from "react";
 import { Cpu, SlidersHorizontal, Upload } from "lucide-react";
 import CornerFrame from "./ui/CornerFrame";
 import MicroLabel from "./ui/MicroLabel";
@@ -66,6 +66,24 @@ function formatParamValue(value, precision) {
   return Number(value ?? 0).toFixed(precision);
 }
 
+/**
+ * ResearchConsole Component
+ *
+ * Provides a forms control dashboard allowing users to:
+ * 1. Upload/drag-and-drop tactical high-resolution imagery.
+ * 2. Configure hyperparameter parameters across two model stages (Guide & Detector).
+ * 3. Initiate the full coarse-to-fine inference pipeline.
+ *
+ * @param {Object} props
+ * @param {File | null} props.imageFile - The uploaded or selected image file object.
+ * @param {Object} props.params - Key-value map of configuration hyperparameters.
+ * @param {Function} props.onFileChange - Handler function called when the user selects or drops a new image file.
+ * @param {Function} props.onParamChange - Handler function called when any slider parameter changes.
+ * @param {Function} props.onExecute - Action handler function triggered on pipeline execution request.
+ * @param {boolean} props.loading - Flag indicating if the pipeline run is currently processing.
+ * @param {string | null} props.error - The error message string, if the last execution failed.
+ * @returns {JSX.Element}
+ */
 function ResearchConsole({ imageFile, params, onFileChange, onParamChange, onExecute, loading, error }) {
   const [dragActive, setDragActive] = useState(false);
   const inputRef = useRef(null);

@@ -1,4 +1,4 @@
-﻿import { memo, useEffect, useMemo, useState } from "react";
+import { memo, useEffect, useMemo, useState } from "react";
 import { Clock3, Crop, Crosshair, Percent } from "lucide-react";
 import CornerFrame from "./ui/CornerFrame";
 import MicroLabel from "./ui/MicroLabel";
@@ -178,6 +178,19 @@ const METRIC_DEFS = [
   { key: "detections", label: "Detections Found", suffix: "", decimals: 0, icon: Crosshair, accent: "text-accent-detector" },
 ];
 
+/**
+ * MetricsPanel Component
+ *
+ * Renders a telemetry dashboard displaying key metrics from the pipeline run:
+ * 1. Total end-to-end inference processing duration.
+ * 2. Total crop candidates identified during slicing.
+ * 3. Percentage of background noise pixels skipped/suppressed.
+ * 4. Quantity of target object classifications found.
+ *
+ * @param {Object} props
+ * @param {Object | null} props.result - The RunPipelineResponse API payload.
+ * @returns {JSX.Element}
+ */
 function MetricsPanel({ result }) {
   const runKey = result?.research?.run_id ?? "idle";
 

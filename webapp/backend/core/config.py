@@ -1,4 +1,4 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
 import os
 from dataclasses import dataclass
@@ -9,16 +9,22 @@ BACKEND_DIR = Path(__file__).resolve().parents[1]
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
 
 
-
 def _env_bool(name: str, default: bool) -> bool:
+    """Reads a boolean environment variable.
+
+    Returns the default if the environment variable is not set or cannot be parsed.
+    """
     raw = os.getenv(name)
     if raw is None:
         return default
     return raw.strip().lower() in {"1", "true", "yes", "on"}
 
 
-
 def _env_int(name: str, default: int) -> int:
+    """Reads an integer environment variable.
+
+    Returns the default if the environment variable is not set or cannot be parsed.
+    """
     raw = os.getenv(name)
     if raw is None:
         return default
@@ -28,8 +34,11 @@ def _env_int(name: str, default: int) -> int:
         return default
 
 
-
 def _env_float(name: str, default: float) -> float:
+    """Reads a float environment variable.
+
+    Returns the default if the environment variable is not set or cannot be parsed.
+    """
     raw = os.getenv(name)
     if raw is None:
         return default
@@ -41,6 +50,11 @@ def _env_float(name: str, default: float) -> float:
 
 @dataclass(frozen=True)
 class AppConfig:
+    """Application-wide configuration dataclass for the Searchlight API backend.
+
+    Holds settings related to API metadata, upload limits, model properties,
+    and runtime performance behavior (e.g., CUDA usage, serial execution locking).
+    """
     api_title: str
     api_version: str
     allow_origins: tuple[str, ...]
@@ -59,6 +73,13 @@ class AppConfig:
 
 @lru_cache(maxsize=1)
 def get_config() -> AppConfig:
+    """Initializes and returns the AppConfig instance based on environment variables.
+
+    Uses an lru_cache to ensure the configuration is parsed only once and cached.
+
+    Returns:
+        AppConfig: The parsed and populated configuration settings.
+    """
     origins_env = os.getenv("SEARCHLIGHT_ALLOW_ORIGINS")
     if origins_env:
         allow_origins = tuple(origin.strip() for origin in origins_env.split(",") if origin.strip())

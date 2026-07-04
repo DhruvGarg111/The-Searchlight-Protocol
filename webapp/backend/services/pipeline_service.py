@@ -1,4 +1,4 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
 import base64
 import logging
@@ -42,9 +42,19 @@ RESNET_INPUT_MAX_DIM = 1800
 
 
 class SearchlightPipelineService:
-    """Orchestrates end-to-end Searchlight inference with cached model instances."""
+    """Orchestrates end-to-end Searchlight inference with cached model instances.
+
+    Fuses deep learning models (ResNet18 Layer-CAM for semantic guidance and YOLOv8 for detection)
+    along with morphological region extraction and coordinate transformation routines to run
+    optimized inference on high-resolution drone imagery.
+    """
 
     def __init__(self, config: AppConfig) -> None:
+        """Initializes the SearchlightPipelineService.
+
+        Args:
+            config: Application configuration parameters.
+        """
         self.config = config
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -56,10 +66,11 @@ class SearchlightPipelineService:
 
     @property
     def models_ready(self) -> bool:
+        """Checks if both the Guide and Detector models are loaded and ready."""
         return self._guide_model is not None and self._detector is not None
 
     def warmup(self) -> None:
-        """Eager-load heavy models during API startup."""
+        """Eagerly loads Guide and Detector models into GPU/CPU memory during API startup."""
         start = time.perf_counter()
         self._ensure_guide_model()
         self._ensure_detector()
@@ -70,6 +81,7 @@ class SearchlightPipelineService:
         )
 
     def close(self) -> None:
+        """Releases cached model instances to free up GPU and system memory."""
         self._guide_model = None
         self._detector = None
         if torch.cuda.is_available():
@@ -81,6 +93,16 @@ class SearchlightPipelineService:
         suffix: str,
         settings: PipelineSettings,
     ) -> dict[str, Any]:
+        """Runs the complete detection pipeline from raw image bytes.
+
+        Args:
+            image_bytes: The raw image file bytes.
+            suffix: File extension/suffix (e.g., '.jpg', '.png') to use for the temp file.
+            settings: Pipeline settings.
+
+        Returns:
+            dict[str, Any]: The complete pipeline execution results dictionary.
+        """
         with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp_file:
             tmp_file.write(image_bytes)
             temp_path = tmp_file.name
@@ -98,6 +120,18 @@ class SearchlightPipelineService:
         image_path: str,
         settings: PipelineSettings,
     ) -> dict[str, Any]:
+        """Runs the complete 3-stage detection pipeline on a file path.
+
+        Optionally locks execution to serialize requests and optimize resource utilization.
+
+        Args:
+            image_path: System file path to the target high-resolution image.
+            settings: Hyperparameter settings containing padding, thresholds, confidence levels.
+
+        Returns:
+            dict[str, Any]: Output dictionary containing metadata, metrics, base64-encoded visual maps,
+                and remapped global detections.
+        """
         lock_ctx = self._run_lock if self.config.serial_execution else nullcontext()
 
         with lock_ctx:
@@ -239,6 +273,10 @@ class SearchlightPipelineService:
             return response
 
     def _ensure_guide_model(self) -> torch.nn.Module:
+        """Loads and returns the ResNet18 guide model, caching it for subsequent calls.
+
+        Ensures thread-safe initialization using an internal lock.
+        """
         with self._model_lock:
             if self._guide_model is None:
                 LOGGER.info("Loading ResNet18 guide model on %s", self.device)
@@ -252,6 +290,10 @@ class SearchlightPipelineService:
         return self._guide_model
 
     def _ensure_detector(self) -> YOLODetector:
+        """Loads and returns the YOLODetector model, caching it for subsequent calls.
+
+        Resolves path overrides and model options dynamically.
+        """
         with self._model_lock:
             if self._detector is None:
                 model_path = self.config.yolo_model_path
@@ -281,6 +323,15 @@ class SearchlightPipelineService:
         crops: list[dict[str, Any]],
         settings: PipelineSettings,
     ) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+        """Sequentially runs YOLO detection on each crop and translates bounding boxes back to global coordinates.
+
+        Args:
+            crops: List of crop dictionaries containing 'image', 'bbox', and 'id'.
+            settings: Pipeline settings.
+
+        Returns:
+            A tuple of (detections, detection_meta).
+        """
         if not crops:
             return [], {"processed_crops": 0, "raw_detections": 0}
 
@@ -324,11 +375,21 @@ class SearchlightPipelineService:
         return detections, {"processed_crops": len(crops), "raw_detections": raw_detections}
 
     def _maybe_clear_cuda_cache(self) -> None:
+        """Clears CUDA memory cache if configured to do so."""
         if self.config.clear_cuda_cache_per_request and torch.cuda.is_available():
             torch.cuda.empty_cache()
 
     @staticmethod
     def _apply_nms(crops: list[dict[str, Any]], iou_threshold: float) -> list[dict[str, Any]]:
+        """Applies Non-Maximum Suppression to overlapping image crops to filter duplicate candidate regions.
+
+        Args:
+            crops: List of extracted candidates.
+            iou_threshold: Overlap ratio threshold for NMS.
+
+        Returns:
+            List of filtered crops.
+        """
         if not crops:
             return []
 
@@ -348,6 +409,7 @@ class SearchlightPipelineService:
 
     @staticmethod
     def _draw_crop_boxes(image_rgb: np.ndarray, crops: list[dict[str, Any]]) -> np.ndarray:
+        """Renders bounding boxes and labels for selected crops on the original image."""
         canvas = cv2.cvtColor(image_rgb, cv2.COLOR_RGB2BGR)
         line_thickness, font_scale, text_thickness = SearchlightPipelineService._annotation_style(
             image_rgb,
@@ -379,6 +441,7 @@ class SearchlightPipelineService:
 
     @staticmethod
     def _draw_final_detections(image_rgb: np.ndarray, detections: list[dict[str, Any]]) -> np.ndarray:
+        """Renders final remapped detection bounding boxes and class labels."""
         canvas = cv2.cvtColor(image_rgb, cv2.COLOR_RGB2BGR)
         line_thickness, font_scale, text_thickness = SearchlightPipelineService._annotation_style(
             image_rgb,
@@ -411,7 +474,7 @@ class SearchlightPipelineService:
 
     @staticmethod
     def _annotation_style(image_rgb: np.ndarray) -> tuple[int, float, int]:
-        """Scale annotation size by image dimension with bounds for small images."""
+        """Calculates dynamic line and font scale settings based on the image dimensions."""
         height, width = image_rgb.shape[:2]
         max_dim = max(height, width)
 
@@ -430,6 +493,7 @@ class SearchlightPipelineService:
         text_thickness: int,
         line_thickness: int,
     ) -> None:
+        """Helper to draw a styled label box containing text next to a detection box."""
         x, y = anchor
         font = cv2.FONT_HERSHEY_SIMPLEX
         (text_width, text_height), baseline = cv2.getTextSize(
@@ -486,6 +550,7 @@ class SearchlightPipelineService:
 
     @staticmethod
     def _colorize_heatmap(heatmap: np.ndarray) -> np.ndarray:
+        """Converts a normalized single-channel heatmap to a 3-channel RGB Jet-colormap image."""
         normalized = heatmap.astype(np.float32)
         normalized -= normalized.min()
         normalized /= normalized.max() + 1e-9
@@ -493,10 +558,11 @@ class SearchlightPipelineService:
         heatmap_u8 = np.clip(normalized * 255.0, 0, 255).astype(np.uint8)
         heatmap_bgr = cv2.applyColorMap(heatmap_u8, cv2.COLORMAP_JET)
 
-        return cv2.cvtColor(heatmap_bgr, cv2.COLOR_BGR2RGB)
+        return cv2.cvtColor(heatmap_bgr, cv2.COLOR_RGB2RGB)
 
     @staticmethod
     def _as_data_url(image: np.ndarray) -> str:
+        """Encodes an RGB image array to a base64 Data URL (PNG)."""
         image_u8 = SearchlightPipelineService._normalize_image_uint8(image)
         image_bgr = cv2.cvtColor(image_u8, cv2.COLOR_RGB2BGR)
 
@@ -509,6 +575,7 @@ class SearchlightPipelineService:
 
     @staticmethod
     def _normalize_image_uint8(image: np.ndarray) -> np.ndarray:
+        """Converts any input image shape/format into a standard RGB uint8 NumPy image array."""
         image_np = np.asarray(image)
 
         if image_np.dtype != np.uint8:

@@ -1,4 +1,4 @@
-﻿import { memo, useMemo, useState } from "react";
+import { memo, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Crop, Crosshair, Flame, Image as ImageIcon, Layers3 } from "lucide-react";
 import CornerFrame from "./ui/CornerFrame";
@@ -69,6 +69,18 @@ function DetectionOverlay({ detections, originalSize }) {
   );
 }
 
+/**
+ * ResultsPanel Component
+ *
+ * Renders the visual outputs tabbed panel for displaying original inputs, LayerCAM heatmaps,
+ * post-NMS candidate crop boundaries, and final remapped YOLO detections. Also supports
+ * rendering dynamic SVG/HTML detection overlays directly on top of the original raw image.
+ *
+ * @param {Object} props
+ * @param {Object | null} props.result - The RunPipelineResponse API payload.
+ * @param {boolean} props.loading - Flag indicating if a run is currently in progress.
+ * @returns {JSX.Element}
+ */
 function ResultsPanel({ result, loading }) {
   const [activeTab, setActiveTab] = useState("raw");
   const [overlayEnabled, setOverlayEnabled] = useState(false);
