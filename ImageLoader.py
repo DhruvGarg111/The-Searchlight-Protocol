@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+from io import BytesIO
 from pathlib import Path
 
 import numpy as np
@@ -68,7 +69,32 @@ class DroneImageLoader:
         if not image_path.exists():
             raise FileNotFoundError(f"Image not found at {image_path}")
 
-        image = Image.open(image_path).convert("RGB")
+        with Image.open(image_path) as image:
+            return self.load_image(image)
+
+    def load_bytes(self, image_bytes: bytes) -> tuple[np.ndarray, torch.Tensor, tuple[int, int], float]:
+        """Loads and preprocesses an image directly from encoded image bytes.
+
+        Args:
+            image_bytes: Encoded image bytes from an upload or in-memory fixture.
+
+        Returns:
+            The same tuple returned by :meth:`load`.
+        """
+        with Image.open(BytesIO(image_bytes)) as image:
+            return self.load_image(image)
+
+    def load_image(self, image: Image.Image) -> tuple[np.ndarray, torch.Tensor, tuple[int, int], float]:
+        """Preprocesses an already opened PIL image.
+
+        Args:
+            image: PIL image object. The image is converted to RGB before processing.
+
+        Returns:
+            A tuple containing the contrast-enhanced original image array, model tensor,
+            original size, and resize scale.
+        """
+        image = image.convert("RGB")
         original_size = image.size
 
         if self.contrast_factor != 1.0:

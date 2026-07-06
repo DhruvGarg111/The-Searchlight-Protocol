@@ -2,16 +2,14 @@ from __future__ import annotations
 
 import base64
 import logging
-import os
 import sys
-import tempfile
 import threading
 import time
 import uuid
 from contextlib import nullcontext
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable
 
 import cv2
 import numpy as np
@@ -38,7 +36,6 @@ from LayerCam import MultiLayerCAM
 from Slicer import IntelligentSlicer
 
 CAM_FUSION_WEIGHTS = {"layer2": 0.7, "layer3": 0.9, "layer4": 1.0}
-RESNET_INPUT_MAX_DIM = 1800
 
 
 class SearchlightPipelineService:
@@ -63,6 +60,7 @@ class SearchlightPipelineService:
 
         self._model_lock = threading.Lock()
         self._run_lock = threading.Lock()
+        self._cam_lock = threading.Lock()
 
     @property
     def models_ready(self) -> bool:
@@ -97,23 +95,14 @@ class SearchlightPipelineService:
 
         Args:
             image_bytes: The raw image file bytes.
-            suffix: File extension/suffix (e.g., '.jpg', '.png') to use for the temp file.
+            suffix: File extension/suffix retained for backward-compatible callers.
             settings: Pipeline settings.
 
         Returns:
             dict[str, Any]: The complete pipeline execution results dictionary.
         """
-        with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp_file:
-            tmp_file.write(image_bytes)
-            temp_path = tmp_file.name
-
-        try:
-            return self.run_from_path(temp_path, settings)
-        finally:
-            try:
-                os.remove(temp_path)
-            except OSError:
-                LOGGER.warning("Failed to remove temp file %s", temp_path)
+        del suffix
+        return self._run_with_loader(settings, lambda loader: loader.load_bytes(image_bytes))
 
     def run_from_path(
         self,
@@ -132,6 +121,14 @@ class SearchlightPipelineService:
             dict[str, Any]: Output dictionary containing metadata, metrics, base64-encoded visual maps,
                 and remapped global detections.
         """
+        return self._run_with_loader(settings, lambda loader: loader.load(image_path))
+
+    def _run_with_loader(
+        self,
+        settings: PipelineSettings,
+        load_image: Callable[[DroneImageLoader], tuple[np.ndarray, torch.Tensor, tuple[int, int], float]],
+    ) -> dict[str, Any]:
+        """Runs the pipeline after loading input through the supplied loader callback."""
         lock_ctx = self._run_lock if self.config.serial_execution else nullcontext()
 
         with lock_ctx:
@@ -143,20 +140,21 @@ class SearchlightPipelineService:
             self._maybe_clear_cuda_cache()
 
             t0 = time.perf_counter()
-            loader = DroneImageLoader(max_dim=RESNET_INPUT_MAX_DIM, device=self.device)
-            original_np, input_tensor, original_size, scale_factor = loader.load(image_path)
+            loader = DroneImageLoader(max_dim=self.config.resnet_input_max_dim, device=self.device)
+            original_np, input_tensor, original_size, scale_factor = load_image(loader)
             stage_timings_ms["image_load"] = (time.perf_counter() - t0) * 1000.0
 
             t0 = time.perf_counter()
             guide_model = self._ensure_guide_model()
             target_layers = [guide_model.layer2[-1], guide_model.layer3[-1], guide_model.layer4[-1]]
 
-            cam_engine = MultiLayerCAM(guide_model, target_layers)
-            try:
-                _ = cam_engine.generate_combined_cam(input_tensor)
-                individual_cams = cam_engine.individual_cams.copy()
-            finally:
-                cam_engine.remove()
+            with self._cam_lock:
+                cam_engine = MultiLayerCAM(guide_model, target_layers)
+                try:
+                    _ = cam_engine.generate_combined_cam(input_tensor)
+                    individual_cams = cam_engine.individual_cams.copy()
+                finally:
+                    cam_engine.remove()
 
             stage_timings_ms["layercam_generation"] = (time.perf_counter() - t0) * 1000.0
 
@@ -195,6 +193,18 @@ class SearchlightPipelineService:
 
             final_overlay = self._draw_final_detections(original_np, detections)
             stage_timings_ms["total_pipeline"] = (time.perf_counter() - pipeline_start) * 1000.0
+
+            outputs = self._build_output_payload(
+                settings=settings,
+                original_np=original_np,
+                individual_cams=individual_cams,
+                heatmap=heatmap,
+                mask=mask,
+                heatmap_resized=heatmap_resized,
+                post_nms_overlay=post_nms_overlay,
+                final_overlay=final_overlay,
+            )
+            crop_payloads = self._build_crop_payload(settings, crops)
 
             response: dict[str, Any] = {
                 "meta": {
@@ -238,26 +248,8 @@ class SearchlightPipelineService:
                     "timings_ms": {stage: round(value, 2) for stage, value in stage_timings_ms.items()},
                     "detection_meta": detection_meta,
                 },
-                "outputs": {
-                    "original_image": self._as_data_url(original_np),
-                    "layer2_cam": self._as_data_url(self._colorize_heatmap(individual_cams[0])),
-                    "layer3_cam": self._as_data_url(self._colorize_heatmap(individual_cams[1])),
-                    "layer4_cam": self._as_data_url(self._colorize_heatmap(individual_cams[2])),
-                    "weighted_fusion_cam": self._as_data_url(self._colorize_heatmap(heatmap)),
-                    "slicer_mask": self._as_data_url(mask),
-                    "heatmap_resized": self._as_data_url(self._colorize_heatmap(heatmap_resized)),
-                    "post_nms_boundaries": self._as_data_url(post_nms_overlay),
-                    "final_detections": self._as_data_url(final_overlay),
-                },
-                "crops": [
-                    {
-                        "id": int(crop["id"]),
-                        "score": float(crop["score"]),
-                        "bbox": [int(v) for v in crop["bbox"]],
-                        "image": self._as_data_url(crop["image"]),
-                    }
-                    for crop in crops
-                ],
+                "outputs": outputs,
+                "crops": crop_payloads,
                 "detections": [
                     {
                         "crop_id": int(det["crop_id"]),
@@ -323,7 +315,7 @@ class SearchlightPipelineService:
         crops: list[dict[str, Any]],
         settings: PipelineSettings,
     ) -> tuple[list[dict[str, Any]], dict[str, Any]]:
-        """Sequentially runs YOLO detection on each crop and translates bounding boxes back to global coordinates.
+        """Runs YOLO detection on retained crops and translates boxes back to global coordinates.
 
         Args:
             crops: List of crop dictionaries containing 'image', 'bbox', and 'id'.
@@ -333,51 +325,167 @@ class SearchlightPipelineService:
             A tuple of (detections, detection_meta).
         """
         if not crops:
-            return [], {"processed_crops": 0, "raw_detections": 0}
+            return [], {
+                "processed_crops": 0,
+                "raw_detections": 0,
+                "batched": True,
+                "global_nms_enabled": settings.enable_global_nms,
+                "global_nms_iou_threshold": settings.global_nms_iou_threshold,
+                "detections_before_global_nms": 0,
+                "detections_after_global_nms": 0,
+            }
 
         detector = self._ensure_detector()
         detections: list[dict[str, Any]] = []
         raw_detections = 0
 
-        for crop in crops:
-            crop_image = crop["image"]
+        results = detector.predict(
+            source=[crop["image"] for crop in crops],
+            conf=settings.yolo_confidence,
+            iou=settings.yolo_iou_threshold,
+            augment=True,
+            agnostic_nms=True,
+            verbose=False,
+        )
+
+        for crop, result in zip(crops, results):
+            boxes = getattr(result, "boxes", None)
+            if boxes is None:
+                continue
+
             bbox_x, bbox_y, _, _ = crop["bbox"]
             crop_id = crop["id"]
 
-            results = detector.predict(
-                source=crop_image,
-                conf=settings.yolo_confidence,
-                iou=settings.yolo_iou_threshold,
-                augment=True,
-                agnostic_nms=True,
-                verbose=False,
-            )
-
-            if not results:
-                continue
-
-            raw_detections += len(results[0].boxes)
-            for box in results[0].boxes:
+            raw_detections += len(boxes)
+            for box in boxes:
                 x1, y1, x2, y2 = box.xyxy[0].cpu().numpy()
                 cls_index = int(box.cls[0])
                 confidence = float(box.conf[0])
-                class_name = results[0].names[cls_index]
+                class_name = result.names[cls_index]
 
                 detections.append(
                     {
                         "crop_id": crop_id,
                         "class": class_name,
+                        "class_index": cls_index,
                         "confidence": confidence,
                         "global_bbox": [x1 + bbox_x, y1 + bbox_y, x2 + bbox_x, y2 + bbox_y],
                     },
                 )
 
-        return detections, {"processed_crops": len(crops), "raw_detections": raw_detections}
+        detections_before_global_nms = len(detections)
+        if settings.enable_global_nms:
+            detections = self._apply_global_detection_nms(
+                detections,
+                settings.global_nms_iou_threshold,
+            )
+
+        return detections, {
+            "processed_crops": len(crops),
+            "raw_detections": raw_detections,
+            "batched": True,
+            "global_nms_enabled": settings.enable_global_nms,
+            "global_nms_iou_threshold": settings.global_nms_iou_threshold,
+            "detections_before_global_nms": detections_before_global_nms,
+            "detections_after_global_nms": len(detections),
+        }
 
     def _maybe_clear_cuda_cache(self) -> None:
         """Clears CUDA memory cache if configured to do so."""
         if self.config.clear_cuda_cache_per_request and torch.cuda.is_available():
             torch.cuda.empty_cache()
+
+    def _build_output_payload(
+        self,
+        settings: PipelineSettings,
+        original_np: np.ndarray,
+        individual_cams: list[np.ndarray],
+        heatmap: np.ndarray,
+        mask: np.ndarray,
+        heatmap_resized: np.ndarray,
+        post_nms_overlay: np.ndarray,
+        final_overlay: np.ndarray,
+    ) -> dict[str, str]:
+        """Builds response image outputs according to the requested payload profile."""
+        if settings.response_profile == "metadata":
+            return {}
+
+        if settings.response_profile == "display":
+            image_format = self._display_image_format()
+            max_dim = self.config.response_display_max_dim
+            return {
+                "original_image": self._as_data_url(
+                    original_np,
+                    max_dim=max_dim,
+                    image_format=image_format,
+                ),
+                "weighted_fusion_cam": self._as_data_url(
+                    self._colorize_heatmap(heatmap),
+                    max_dim=max_dim,
+                    image_format=image_format,
+                ),
+                "post_nms_boundaries": self._as_data_url(
+                    post_nms_overlay,
+                    max_dim=max_dim,
+                    image_format=image_format,
+                ),
+                "final_detections": self._as_data_url(
+                    final_overlay,
+                    max_dim=max_dim,
+                    image_format=image_format,
+                ),
+            }
+
+        return {
+            "original_image": self._as_data_url(original_np),
+            "layer2_cam": self._as_data_url(self._colorize_heatmap(individual_cams[0])),
+            "layer3_cam": self._as_data_url(self._colorize_heatmap(individual_cams[1])),
+            "layer4_cam": self._as_data_url(self._colorize_heatmap(individual_cams[2])),
+            "weighted_fusion_cam": self._as_data_url(self._colorize_heatmap(heatmap)),
+            "slicer_mask": self._as_data_url(mask),
+            "heatmap_resized": self._as_data_url(self._colorize_heatmap(heatmap_resized)),
+            "post_nms_boundaries": self._as_data_url(post_nms_overlay),
+            "final_detections": self._as_data_url(final_overlay),
+        }
+
+    def _build_crop_payload(
+        self,
+        settings: PipelineSettings,
+        crops: list[dict[str, Any]],
+    ) -> list[dict[str, Any]]:
+        """Builds crop metadata while limiting crop image payloads for lighter profiles."""
+        crop_payloads: list[dict[str, Any]] = []
+        display_crop_limit = max(0, self.config.response_display_crop_limit)
+        image_format = self._display_image_format()
+
+        for index, crop in enumerate(crops):
+            image_payload = ""
+            if settings.response_profile == "full":
+                image_payload = self._as_data_url(crop["image"])
+            elif settings.response_profile == "display" and index < display_crop_limit:
+                image_payload = self._as_data_url(
+                    crop["image"],
+                    max_dim=self.config.response_display_max_dim,
+                    image_format=image_format,
+                )
+
+            crop_payloads.append(
+                {
+                    "id": int(crop["id"]),
+                    "score": float(crop["score"]),
+                    "bbox": [int(v) for v in crop["bbox"]],
+                    "image": image_payload,
+                },
+            )
+
+        return crop_payloads
+
+    def _display_image_format(self) -> str:
+        """Returns a supported display image format, preserving PNG when config is invalid."""
+        image_format = self.config.response_display_format.lower().lstrip(".")
+        if image_format in {"png", "jpg", "jpeg", "webp"}:
+            return image_format
+        return "png"
 
     @staticmethod
     def _apply_nms(crops: list[dict[str, Any]], iou_threshold: float) -> list[dict[str, Any]]:
@@ -406,6 +514,43 @@ class SearchlightPipelineService:
         keep_indices = torchvision.ops.nms(boxes_tensor, scores_tensor, iou_threshold)
 
         return [crops[i] for i in keep_indices.tolist()]
+
+    @staticmethod
+    def _apply_global_detection_nms(
+        detections: list[dict[str, Any]],
+        iou_threshold: float,
+    ) -> list[dict[str, Any]]:
+        """Applies final class-aware NMS to detections after remapping to global coordinates."""
+        if not detections:
+            return []
+
+        kept_detections: list[dict[str, Any]] = []
+        class_groups: dict[int, list[int]] = {}
+        for index, detection in enumerate(detections):
+            class_index = int(detection.get("class_index", -1))
+            class_groups.setdefault(class_index, []).append(index)
+
+        for detection_indices in class_groups.values():
+            boxes = [
+                [float(value) for value in detections[index]["global_bbox"]]
+                for index in detection_indices
+            ]
+            scores = [float(detections[index]["confidence"]) for index in detection_indices]
+            keep_indices = torchvision.ops.nms(
+                torch.tensor(boxes, dtype=torch.float32),
+                torch.tensor(scores, dtype=torch.float32),
+                iou_threshold,
+            )
+            kept_detections.extend(detections[detection_indices[index]] for index in keep_indices.tolist())
+
+        return sorted(
+            kept_detections,
+            key=lambda detection: (
+                int(detection["crop_id"]),
+                -float(detection["confidence"]),
+                str(detection["class"]),
+            ),
+        )
 
     @staticmethod
     def _draw_crop_boxes(image_rgb: np.ndarray, crops: list[dict[str, Any]]) -> np.ndarray:
@@ -558,20 +703,45 @@ class SearchlightPipelineService:
         heatmap_u8 = np.clip(normalized * 255.0, 0, 255).astype(np.uint8)
         heatmap_bgr = cv2.applyColorMap(heatmap_u8, cv2.COLORMAP_JET)
 
-        return cv2.cvtColor(heatmap_bgr, cv2.COLOR_RGB2RGB)
+        return cv2.cvtColor(heatmap_bgr, cv2.COLOR_BGR2RGB)
 
     @staticmethod
-    def _as_data_url(image: np.ndarray) -> str:
-        """Encodes an RGB image array to a base64 Data URL (PNG)."""
+    def _as_data_url(
+        image: np.ndarray,
+        max_dim: int | None = None,
+        image_format: str = "png",
+    ) -> str:
+        """Encodes an RGB image array to a base64 Data URL."""
         image_u8 = SearchlightPipelineService._normalize_image_uint8(image)
+        if max_dim and max_dim > 0:
+            height, width = image_u8.shape[:2]
+            scale = min(max_dim / width, max_dim / height, 1.0)
+            if scale < 1.0:
+                resized_size = (max(1, int(width * scale)), max(1, int(height * scale)))
+                image_u8 = cv2.resize(image_u8, resized_size, interpolation=cv2.INTER_AREA)
+
         image_bgr = cv2.cvtColor(image_u8, cv2.COLOR_RGB2BGR)
 
-        encoded_ok, encoded = cv2.imencode(".png", image_bgr)
+        normalized_format = image_format.lower().lstrip(".")
+        if normalized_format in {"jpg", "jpeg"}:
+            extension = ".jpg"
+            mime_type = "image/jpeg"
+            encode_params = [cv2.IMWRITE_JPEG_QUALITY, 90]
+        elif normalized_format == "webp":
+            extension = ".webp"
+            mime_type = "image/webp"
+            encode_params = [cv2.IMWRITE_WEBP_QUALITY, 90]
+        else:
+            extension = ".png"
+            mime_type = "image/png"
+            encode_params = []
+
+        encoded_ok, encoded = cv2.imencode(extension, image_bgr, encode_params)
         if not encoded_ok:
             raise RuntimeError("Failed to encode output image.")
 
         image_b64 = base64.b64encode(encoded.tobytes()).decode("utf-8")
-        return f"data:image/png;base64,{image_b64}"
+        return f"data:{mime_type};base64,{image_b64}"
 
     @staticmethod
     def _normalize_image_uint8(image: np.ndarray) -> np.ndarray:

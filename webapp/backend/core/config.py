@@ -63,9 +63,14 @@ class AppConfig:
     max_image_dimension: int
     max_image_pixels: int
     request_timeout_seconds: float
+    resnet_input_max_dim: int
     preload_models: bool
     clear_cuda_cache_per_request: bool
     serial_execution: bool
+    enable_global_nms_default: bool
+    response_display_max_dim: int
+    response_display_crop_limit: int
+    response_display_format: str
     yolo_model_version: str
     yolo_model_variant: str
     yolo_model_path: Path
@@ -109,9 +114,14 @@ def get_config() -> AppConfig:
         max_image_dimension=_env_int("SEARCHLIGHT_MAX_IMAGE_DIMENSION", 12000),
         max_image_pixels=_env_int("SEARCHLIGHT_MAX_IMAGE_PIXELS", 90_000_000),
         request_timeout_seconds=_env_float("SEARCHLIGHT_REQUEST_TIMEOUT_SECONDS", 240.0),
+        resnet_input_max_dim=_env_int("SEARCHLIGHT_RESNET_INPUT_MAX_DIM", 1800),
         preload_models=_env_bool("SEARCHLIGHT_PRELOAD_MODELS", True),
         clear_cuda_cache_per_request=_env_bool("SEARCHLIGHT_CLEAR_CUDA_CACHE_PER_REQUEST", False),
         serial_execution=_env_bool("SEARCHLIGHT_SERIAL_EXECUTION", True),
+        enable_global_nms_default=_env_bool("SEARCHLIGHT_ENABLE_GLOBAL_NMS", False),
+        response_display_max_dim=_env_int("SEARCHLIGHT_RESPONSE_DISPLAY_MAX_DIM", 1600),
+        response_display_crop_limit=_env_int("SEARCHLIGHT_RESPONSE_DISPLAY_CROP_LIMIT", 6),
+        response_display_format=os.getenv("SEARCHLIGHT_RESPONSE_DISPLAY_FORMAT", "png").lower(),
         yolo_model_version=default_yolo_version,
         yolo_model_variant=default_yolo_variant,
         yolo_model_path=model_path,

@@ -1,22 +1,22 @@
-﻿from __future__ import annotations
+from __future__ import annotations
+
+from typing import Any
 
 from fastapi import APIRouter, Depends
 
 try:
     from ..core.dependencies import get_pipeline_service
     from ..models.api import HealthResponse
-    from ..services.pipeline_service import SearchlightPipelineService
 except ImportError:
     from core.dependencies import get_pipeline_service
     from models.api import HealthResponse
-    from services.pipeline_service import SearchlightPipelineService
 
 router = APIRouter()
 
 
 @router.get("/health", response_model=HealthResponse)
 def health(
-    pipeline_service: SearchlightPipelineService = Depends(get_pipeline_service),
+    pipeline_service: Any = Depends(get_pipeline_service),
 ) -> HealthResponse:
     return HealthResponse(
         status="ok",

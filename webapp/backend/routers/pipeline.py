@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+from typing import Any
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
 from starlette.concurrency import run_in_threadpool
@@ -11,7 +12,6 @@ try:
     from ..core.config import AppConfig
     from ..models.api import ErrorResponse, RunPipelineResponse
     from ..models.pipeline import PipelineSettings
-    from ..services.pipeline_service import SearchlightPipelineService
     from ..utils.validation import (
         safe_suffix,
         validate_content_type,
@@ -23,7 +23,6 @@ except ImportError:
     from core.config import AppConfig
     from models.api import ErrorResponse, RunPipelineResponse
     from models.pipeline import PipelineSettings
-    from services.pipeline_service import SearchlightPipelineService
     from utils.validation import (
         safe_suffix,
         validate_content_type,
@@ -52,7 +51,11 @@ async def run_pipeline(
     yolo_confidence: float = Form(0.3, ge=0.0, le=1.0),
     min_crop_size: int = Form(120, ge=32, le=4096),
     nms_iou_threshold: float = Form(0.2, ge=0.0, le=1.0),
-    pipeline_service: SearchlightPipelineService = Depends(get_pipeline_service),
+    yolo_iou_threshold: float = Form(0.6, ge=0.0, le=1.0),
+    response_profile: str = Form("full", pattern="^(full|display|metadata)$"),
+    enable_global_nms: bool | None = Form(None),
+    global_nms_iou_threshold: float = Form(0.5, ge=0.0, le=1.0),
+    pipeline_service: Any = Depends(get_pipeline_service),
     config: AppConfig = Depends(get_app_config),
 ) -> RunPipelineResponse:
     """Runs the 3-stage coarse-to-fine object detection pipeline on the uploaded image.
@@ -98,6 +101,14 @@ async def run_pipeline(
             yolo_confidence=yolo_confidence,
             min_crop_size=min_crop_size,
             nms_iou_threshold=nms_iou_threshold,
+            yolo_iou_threshold=yolo_iou_threshold,
+            response_profile=response_profile,
+            enable_global_nms=(
+                config.enable_global_nms_default
+                if enable_global_nms is None
+                else enable_global_nms
+            ),
+            global_nms_iou_threshold=global_nms_iou_threshold,
         )
 
         result = await asyncio.wait_for(
