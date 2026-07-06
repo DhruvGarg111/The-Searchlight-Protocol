@@ -3,6 +3,7 @@ __pycache__/
 *.py[cod]
 *.pyc.*
 .pytest_cache/
+.pytest-tmp/
 .mypy_cache/
 .ruff_cache/
 .ipynb_checkpoints/
@@ -20,6 +21,12 @@ ENV/
 webapp/frontend/node_modules/
 webapp/frontend/dist/
 
+# Benchmark output artifacts
+.baseline-head*/
+.baseline-head*.tar
+.benchmark-fixtures/
+benchmarks/results/
+
 # Accidental root npm lockfile (frontend lockfile stays tracked)
 /package-lock.json
 
@@ -28,4 +35,3 @@ webapp/frontend/dist/
 Thumbs.db
 .vscode/
 .idea/
-
