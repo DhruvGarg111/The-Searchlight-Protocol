@@ -1,30 +1,31 @@
 # Frontend Console Overview
 
-The frontend dashboard console of **The Searchlight Protocol** provides a modern, dark-themed tactical research interface. It is built as a Single Page Application (SPA) using React, Vite, Framer Motion, and Tailwind CSS.
+The frontend dashboard console of **The Searchlight Protocol** provides a dark tactical research interface. It is built as a single-page application using React, Vite, Framer Motion, and Tailwind CSS.
 
 ---
 
-## 📂 React Source Tree
+## React Source Tree
 
-```
+```text
 webapp/frontend/src/
-├── main.jsx                 # Entry mounting node
-├── App.jsx                  # Main wrapper coordinating request state
-├── App.css                  # Custom keyframes and radar sweeps styling
-├── index.css                # Tailwind base directives and custom components tokens
-└── components/
-    ├── HeroSection.jsx      # Stage graph visualization header
-    ├── ResearchConsole.jsx  # Input uploading and hyperparameter control sliders
-    ├── ResultsPanel.jsx     # Tabbed rendering canvas for outputs
-    ├── MetricsPanel.jsx     # Telemetry dashboard
-    └── ui/
-        ├── CornerFrame.jsx  # Styled sci-fi grid block wrapper
-        └── MicroLabel.jsx   # Micro-typographical label
+|-- main.jsx                 # Entry mounting node
+|-- App.jsx                  # Main wrapper coordinating request state
+|-- index.css                # Tailwind base directives and custom component tokens
+`-- components/
+    |-- HeroSection.jsx      # Stage graph visualization header
+    |-- ResearchConsole.jsx  # Input upload and hyperparameter sliders
+    |-- ResultsPanel.jsx     # Tabbed rendering canvas for outputs
+    |-- MetricsPanel.jsx     # Telemetry dashboard
+    `-- ui/
+        |-- CornerFrame.jsx  # Styled grid block wrapper
+        `-- MicroLabel.jsx   # Micro-typographical label
 ```
+
+Fonts are loaded from `index.html` with preconnect hints rather than CSS `@import` so browser discovery starts earlier.
 
 ---
 
-## ⚡ Client State Coordination
+## Client State Coordination
 
 The root `App.jsx` component maintains the primary state machine for the application session:
 
@@ -39,9 +40,12 @@ stateDiagram-v2
     RenderResults --> ImageSelected : Upload New Frame
 ```
 
-### State Fields:
-*   `imageFile` (`File | null`): Holds reference to the uploaded tactical frame file.
-*   `params` (`Object`): Map of hyperparameters passed down to `ResearchConsole` sliders.
-*   `loading` (`Boolean`): Toggles global backdrop loader spinners.
-*   `results` (`RunPipelineResponse | null`): Stores JSON payload output on success.
-*   `error` (`String | null`): Captures failure context alerts.
+### State Fields
+
+* `imageFile` (`File | null`): Holds the uploaded tactical frame.
+* `params` (`Object`): Hyperparameters passed to `ResearchConsole` sliders.
+* `loading` (`Boolean`): Toggles global processing state.
+* `result` (`RunPipelineResponse | null`): Stores JSON payload output on success.
+* `error` (`String`): Captures failure context alerts.
+
+The frontend requests the backend `display` response profile, which preserves the rendered tabs and crop samples while avoiding the full diagnostic image payload.

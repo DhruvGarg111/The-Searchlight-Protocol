@@ -16,9 +16,14 @@ The FastAPI backend is configured using standard environment variables. This ref
 | `SEARCHLIGHT_MAX_IMAGE_DIMENSION` | `Int` | `12000` | Maximum pixel width or height allowed for validation. |
 | `SEARCHLIGHT_MAX_IMAGE_PIXELS` | `Int` | `90000000` (90 MP) | Maximum allowed total pixels ($W \times H$) for validation. |
 | `SEARCHLIGHT_REQUEST_TIMEOUT_SECONDS` | `Float` | `240.0` | Timeout threshold for async request offloading. |
+| `SEARCHLIGHT_RESNET_INPUT_MAX_DIM` | `Int` | `1800` | Maximum dimension used for the ResNet/LayerCAM input tensor. |
 | `SEARCHLIGHT_PRELOAD_MODELS` | `Bool` | `True` | Eagerly loads models during startup to reduce initial latency. |
 | `SEARCHLIGHT_CLEAR_CUDA_CACHE_PER_REQUEST`| `Bool` | `False` | Forces cuda cache clear after every pipeline execution. |
 | `SEARCHLIGHT_SERIAL_EXECUTION` | `Bool` | `True` | Locks execution threads to serialize incoming requests. |
+| `SEARCHLIGHT_ENABLE_GLOBAL_NMS` | `Bool` | `False` | Default for optional final NMS over global remapped detections. |
+| `SEARCHLIGHT_RESPONSE_DISPLAY_MAX_DIM` | `Int` | `1600` | Maximum image dimension for `display` response profile outputs. |
+| `SEARCHLIGHT_RESPONSE_DISPLAY_CROP_LIMIT` | `Int` | `6` | Number of crop images encoded in `display` response profile. |
+| `SEARCHLIGHT_RESPONSE_DISPLAY_FORMAT` | `String` | `"png"` | Image format for `display` payloads: `png`, `jpg`, `jpeg`, or `webp`. |
 | `SEARCHLIGHT_YOLO_MODEL_VERSION` | `String` | `"v8"` | Model version directory suffix (e.g. `"v8"`, `"v9"`). |
 | `SEARCHLIGHT_YOLO_MODEL_VARIANT` | `String` | `"n"` | Model weight category (e.g. `"n"`, `"s"`, `"m"`, `"l"`). |
 | `SEARCHLIGHT_YOLO_MODEL_PATH` | `String` | `yolov8n.pt` | Direct weights path override on disk. |

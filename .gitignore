@@ -16,6 +16,7 @@ ENV/
 
 # Local tooling state
 .agent/
+/AGENTS.md
 
 # Frontend build artifacts
 webapp/frontend/node_modules/

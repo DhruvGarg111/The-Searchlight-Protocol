@@ -48,6 +48,7 @@ function App() {
     Object.entries(params).forEach(([key, value]) => {
       formData.append(key, String(value));
     });
+    formData.append("response_profile", "display");
 
     try {
       const response = await fetch(`${API_BASE_URL}/api/run-pipeline`, {

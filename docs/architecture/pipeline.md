@@ -24,6 +24,8 @@ By default, the pipeline initializes a **ResNet18** model pretrained on ImageNet
 *   `layer3[-1]` (intermediate geometric patterns)
 *   `layer4[-1]` (high-level semantic abstractions)
 
+The current implementation registers all target-layer hooks together and performs a single forward/backward pass to collect the activations and gradients for all three maps.
+
 ### 2. LayerCAM Formulation
 Unlike standard Grad-CAM, which uses global average pooled gradients, Layer-CAM uses positive gradients at each spatial location to weight corresponding activations. For a layer activation $A$ with dimensions $C \times H \times W$ and target class score $y$:
 
@@ -72,7 +74,7 @@ To prevent heavily overlapping crops from generating redundant YOLO inference wo
 Stage 3 executes high-fidelity object detection exclusively on the extracted, downscaled candidate sub-images.
 
 ### 1. YOLO Inference
-Each crop is fed to an Ultralytics YOLO detector (typically YOLOv8n) with test-time augmentation (TTA) and class-agnostic NMS enabled.
+Retained crops are passed to the Ultralytics YOLO detector (typically YOLOv8n) as one batched source list with test-time augmentation (TTA) and class-agnostic NMS enabled.
 
 ### 2. Global Coordinate Remap
 Because YOLO outputs coordinates relative to the crop boundary, they must be projected back to the original global frame. For a detection inside crop $i$ with crop coordinates $(x_{c,i}, y_{c,i})$, local prediction $(x_1, y_1, x_2, y_2)$ is translated:
@@ -83,4 +85,4 @@ $$x_{2,\text{global}} = x_2 + x_{c,i}$$
 $$y_{2,\text{global}} = y_2 + y_{c,i}$$
 
 ### 3. Final Fusion
-Remapped global bounding boxes are collected and prepared for API response payload serialization.
+Remapped global bounding boxes are collected and prepared for API response payload serialization. Optional class-aware global NMS can be enabled with `enable_global_nms` or the `SEARCHLIGHT_ENABLE_GLOBAL_NMS` default, but it remains off by default until fixture comparisons validate it for a deployment.

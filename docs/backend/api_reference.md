@@ -11,10 +11,9 @@ Retrieves the current execution status and check telemetry.
 ### Response `200 OK`
 ```json
 {
-  "status": "healthy",
-  "timestamp": "2026-07-04T15:30:00.000000Z",
-  "models_ready": true,
-  "device": "cuda"
+  "status": "ok",
+  "device": "cuda",
+  "models_ready": true
 }
 ```
 
@@ -36,6 +35,10 @@ Runs the three-stage detection pipeline on the provided image bytes.
 | `yolo_confidence` | `Float` | `0.3` | $[0.0, 1.0]$ | Min confidence threshold for YOLO detections. |
 | `min_crop_size` | `Int` | `120` | $[32, 4096]$ | Resolution floor in pixels for any sliced crop. |
 | `nms_iou_threshold` | `Float` | `0.2` | $[0.0, 1.0]$ | IoU threshold for candidate crop deduplication. |
+| `yolo_iou_threshold` | `Float` | `0.6` | $[0.0, 1.0]$ | IoU threshold passed to YOLO inference. |
+| `response_profile` | `String` | `full` | `full`, `display`, `metadata` | Payload profile. `full` preserves all current images, `display` returns UI-sized visuals, and `metadata` omits image payloads. |
+| `enable_global_nms` | `Bool` | backend default | `true`, `false` | Enables optional final NMS over global remapped detections. |
+| `global_nms_iou_threshold` | `Float` | `0.5` | $[0.0, 1.0]$ | IoU threshold for optional global detection NMS. |
 
 ---
 
@@ -47,9 +50,11 @@ Runs the three-stage detection pipeline on the provided image bytes.
 *   `meta`: GPU status and software versions.
 *   `settings`: Configuration settings applied.
 *   `counts`: Total count of crops (pre-NMS & post-NMS) and final objects detected.
-*   `outputs`: Base64-encoded visual maps (original, layer CAM maps, fused heatmap, slicer mask, bounding crops, final annotated detections).
-*   `crops`: Array of crop specifications, containing `id`, `score`, global `bbox` coordinates, and base64 crop image.
+*   `outputs`: Base64-encoded visual maps. The default `full` profile includes original, layer CAM maps, fused heatmap, slicer mask, crop boundaries, and final annotated detections.
+*   `crops`: Array of crop specifications, containing `id`, `score`, global `bbox` coordinates, and base64 crop image when included by the selected response profile.
 *   `detections`: Array of objects found, containing `crop_id`, `class` name, `confidence`, and `global_bbox` coordinates `[x1, y1, x2, y2]`.
+
+`display` profile keeps the frontend-visible outputs (`original_image`, `weighted_fusion_cam`, `post_nms_boundaries`, `final_detections`) and crop image payloads for the first configured crop samples. `metadata` profile keeps metadata, crop boxes, and detections but returns no image bytes.
 
 ---
 

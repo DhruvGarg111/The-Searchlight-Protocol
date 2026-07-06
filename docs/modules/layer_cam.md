@@ -63,17 +63,19 @@ Removes hooks from target layer. Must be called to avoid leaks.
 def __init__(
     self,
     model: torch.nn.Module,
-    target_layers: list[torch.nn.Module]
+    target_layers: list[torch.nn.Module],
+    use_amp: bool = True
 ) -> None
 ```
 
-Wraps multiple LayerCAM runs across different network layers.
+Registers hooks for multiple target layers so all maps can be captured from one model forward/backward pass.
 
 #### Parameters:
-| Name | Type | Description |
-| :--- | :--- | :--- |
-| `model` | `torch.nn.Module` | Backbone module. |
-| `target_layers` | `list[torch.nn.Module]` | List of sub-modules to capture. |
+| Name | Type | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `model` | `torch.nn.Module` | *Required* | Backbone module. |
+| `target_layers` | `list[torch.nn.Module]` | *Required* | List of sub-modules to capture. |
+| `use_amp` | `bool` | `True` | Uses Mixed Precision if CUDA is available. |
 
 ---
 
@@ -86,7 +88,7 @@ def generate_combined_cam(
 ) -> np.ndarray
 ```
 
-Runs inference across each registered hook target and aggregates maps.
+Runs one model forward/backward pass, computes each layer CAM from the captured tensors, and aggregates maps.
 
 #### Parameters:
 | Name | Type | Default | Description |

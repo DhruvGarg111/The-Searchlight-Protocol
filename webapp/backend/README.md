@@ -74,8 +74,12 @@ Returns:
 - `yolo_confidence` (default `0.3`)
 - `min_crop_size` (default `120`)
 - `nms_iou_threshold` (default `0.2`)
+- `yolo_iou_threshold` (default `0.6`)
+- `response_profile` (default `full`; `full`, `display`, or `metadata`)
+- `enable_global_nms` (optional; defaults to backend config)
+- `global_nms_iou_threshold` (default `0.5`)
 
-ResNet guide preprocessing uses a fixed max image dimension of `1024`.
+ResNet guide preprocessing uses `SEARCHLIGHT_RESNET_INPUT_MAX_DIM`, defaulting to `1800`.
 
 Response includes:
 - `meta`, `settings`, `counts`, `research`
@@ -87,6 +91,8 @@ Response includes:
 - Models are cached in `SearchlightPipelineService`.
 - Inference executes in a threadpool and is wrapped with timeout control.
 - Upload validation checks media type, byte size, dimensions, and pixel count.
+- Upload bytes are decoded in memory; `run_from_path` remains available for local scripts.
+- `/api/run-pipeline` supports `full`, `display`, and `metadata` response profiles. `full` is the backward-compatible default.
 
 ## Environment Variables
 
@@ -97,9 +103,14 @@ Primary variables:
 - `SEARCHLIGHT_MAX_IMAGE_DIMENSION`
 - `SEARCHLIGHT_MAX_IMAGE_PIXELS`
 - `SEARCHLIGHT_REQUEST_TIMEOUT_SECONDS`
+- `SEARCHLIGHT_RESNET_INPUT_MAX_DIM`
 - `SEARCHLIGHT_PRELOAD_MODELS`
 - `SEARCHLIGHT_CLEAR_CUDA_CACHE_PER_REQUEST`
 - `SEARCHLIGHT_SERIAL_EXECUTION`
+- `SEARCHLIGHT_ENABLE_GLOBAL_NMS`
+- `SEARCHLIGHT_RESPONSE_DISPLAY_MAX_DIM`
+- `SEARCHLIGHT_RESPONSE_DISPLAY_CROP_LIMIT`
+- `SEARCHLIGHT_RESPONSE_DISPLAY_FORMAT`
 - `SEARCHLIGHT_YOLO_MODEL_VERSION`
 - `SEARCHLIGHT_YOLO_MODEL_VARIANT`
 - `SEARCHLIGHT_YOLO_MODEL_PATH`
